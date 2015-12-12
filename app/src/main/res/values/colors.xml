@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="whiteField">#FFFFFF</color>
+    <color name="blackField">#00A0A0</color>
+    <color name="whiteFieldPressed">#E8C0C0</color>
+    <color name="blackFieldPressed">#C0A0A0</color>
+
+</resources>

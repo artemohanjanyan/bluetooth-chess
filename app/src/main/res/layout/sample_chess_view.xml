@@ -1,0 +1,12 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res/lec.chessproto"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <lec.chessproto.GameView
+        android:background="#ccc" android:layout_width="326dp"
+        android:layout_height="match_parent" android:paddingLeft="20dp" android:paddingBottom="40dp"
+        app:exampleDimension="24sp" app:exampleColor="#33b5e5" app:exampleString="Hello, ChessView"
+        app:exampleDrawable="@android:drawable/ic_menu_add"
+        android:layout_gravity="center" />
+
+</FrameLayout>
