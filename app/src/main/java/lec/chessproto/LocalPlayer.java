@@ -1,7 +1,10 @@
 package lec.chessproto;
 
+import android.util.Log;
+
 import java.util.List;
 
+import lec.chessproto.chess.Game;
 import lec.chessproto.chess.SimpleMove;
 import lec.chessproto.chess.Figure;
 import lec.chessproto.chess.Move;
@@ -12,6 +15,8 @@ public class LocalPlayer extends Player implements GameView.DeskListener {
 
     boolean selected = false;
     int srow, scolumn;
+
+    private static final String TAG = "LocalPlayer";
 
     @Override
     public Figure onFieldDrag(int row, int column) {
@@ -42,7 +47,10 @@ public class LocalPlayer extends Player implements GameView.DeskListener {
 
     @Override
     public void onFieldDrop(int row, int column) {
-
     }
 
+    @Override
+    public void onYourTurn() {
+        Log.d(TAG, Game.getColorName(getColor()) + " player turn started");
+    }
 }

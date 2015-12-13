@@ -2,7 +2,7 @@ package lec.chessproto.chess;
 
 import java.util.List;
 
-public abstract class Player {
+public abstract class Player  {
 
     Game game;
     boolean color;
@@ -23,5 +23,7 @@ public abstract class Player {
         return game.moveFigure(this, move);
     }
 
+
+    public abstract void onYourTurn();
 
 }

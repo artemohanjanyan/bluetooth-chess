@@ -7,9 +7,9 @@ import java.util.List;
 
 public  class Figure {
 
-    private boolean color;
+    public final boolean color;
     private MoveFinder m;
-    private int ID;
+    public final int ID;
 
     public Figure(boolean color, int ID, MoveFinder m) {
         this.color = color;
@@ -97,15 +97,15 @@ public  class Figure {
             int nrow = row + drow;
             if (isFieldCordsCorrect(nrow, column) && desk.d[nrow][column] == null) {
                 ret.add(new SimpleMove(row, column, nrow, column));
+                if (row == startrow && desk.d[row + 2 * drow][column] == null) {
+                    ret.add(new SimpleMove(row, column, row + 2 * drow, column));
+                }
             }
             if (isFieldCordsCorrect(nrow, column - 1) && desk.d[nrow][column - 1] != null && desk.d[nrow][column - 1].color ^ figure.color) {
                 ret.add(new SimpleMove(row, column, nrow, column - 1));
             }
             if (isFieldCordsCorrect(nrow, column + 1) && desk.d[nrow][column + 1] != null && desk.d[nrow][column + 1].color ^ figure.color) {
                 ret.add(new SimpleMove(row, column, nrow, column + 1));
-            }
-            if (row == startrow && desk.d[row + 2 * drow][column] == null) {
-                ret.add(new SimpleMove(row, column, row + 2 * drow, column));
             }
             return ret;
         }

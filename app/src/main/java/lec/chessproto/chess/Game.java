@@ -43,16 +43,25 @@ public abstract class Game {
     abstract List<Move> chooseFigure(Player player, int row, int column);
 
     synchronized boolean  moveFigure(Player player, Move move) {
+        if (player != whitePlayer && player != blackPlayer && desk.turn ^ player.color) {
+            return false;
+        }
         move.execute(desk);
-        if (move.terminal) {
-            desk.nextTurn();
-        }
-
-        if (listener != null) {
-            listener.onMoveExecuted();
-        }
-
+        onMoveExecution(player, move);
         return true;
     }
 
+    protected synchronized void onMoveExecution(Player player, Move move) {
+        if (move.terminal) {
+            desk.nextTurn();
+            ((player == whitePlayer) ? blackPlayer : whitePlayer).onYourTurn();
+        }
+        if (listener != null) {
+            listener.onMoveExecuted();
+        }
+    }
+
+    public static String getColorName(boolean color) {
+        return color ? "black" : "white";
+    }
 }

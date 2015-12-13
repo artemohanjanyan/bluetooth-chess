@@ -1,7 +1,9 @@
 package lec.chessproto.chess;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 public class Desk {
@@ -101,5 +103,21 @@ public class Desk {
 
     void nextTurn() {
         turn = !turn;
+    }
+
+    Desk getMoveExecutedDesk(Move move) {
+        Figure[][] fCopy = new Figure[Desk.SIZE][Desk.SIZE];
+
+        for (int i = 0; i < Desk.SIZE; i++) {
+            System.arraycopy(d[i], 0, fCopy[i], 0, Desk.SIZE);
+        }
+        Desk ret = new Desk(game, fCopy, turn);
+        move.execute(ret);
+
+        if (move.terminal) {
+            ret.nextTurn();
+        }
+
+        return ret;
     }
 }

@@ -1,6 +1,5 @@
 package lec.chessproto;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -8,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -17,7 +17,6 @@ import java.util.List;
 
 import lec.chessproto.chess.Desk;
 import lec.chessproto.chess.Figure;
-import lec.chessproto.chess.FigureMoves;
 import lec.chessproto.chess.Move;
 
 
@@ -28,7 +27,6 @@ public class GameView extends View {
     public static final int FIGURES_COUNT = 12;
 
     public Desk desk;
-    public Void aVoid;
 
     private Paint whiteFieldPaint, blackFieldPaint, whiteFieldPressedPaint, blackFieldPressedPaint, figurePaint;
     private int fieldSize, boardSize;
@@ -40,8 +38,10 @@ public class GameView extends View {
 
     private boolean fieldTouchDowned = false;
     private int pressedColumn = -1, pressedRow = -1;
+    private int pressedX, pressedY;
 
     private Resources res;
+    private Resources.Theme theme;
 
     public List<Move> markerMoves;
 
@@ -76,11 +76,18 @@ public class GameView extends View {
         figurePaint = new Paint();
 
         res = getResources();
-        whiteFieldPaint.setColor(res.getColor(R.color.whiteField));
-        blackFieldPaint.setColor(res.getColor(R.color.blackField));
-        whiteFieldPressedPaint.setColor(res.getColor(R.color.whiteFieldPressed));
-        blackFieldPressedPaint.setColor(res.getColor(R.color.blackFieldPressed));
-
+        theme = res.newTheme();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            whiteFieldPaint.setColor(res.getColor(R.color.whiteField, theme));
+            blackFieldPaint.setColor(res.getColor(R.color.blackField, theme));
+            whiteFieldPressedPaint.setColor(res.getColor(R.color.whiteFieldPressed, theme));
+            blackFieldPressedPaint.setColor(res.getColor(R.color.blackFieldPressed, theme));
+        } else {
+            whiteFieldPaint.setColor(res.getColor(R.color.whiteField));
+            blackFieldPaint.setColor(res.getColor(R.color.blackField));
+            whiteFieldPressedPaint.setColor(res.getColor(R.color.whiteFieldPressed));
+            blackFieldPressedPaint.setColor(res.getColor(R.color.blackFieldPressed));
+        }
         figureBitmapMap = new Bitmap[FIGURES_COUNT];
 
         loadFigureBitmap(Figure.WHITE_PAWN.getID()  , R.drawable.white_pawn);
@@ -102,7 +109,7 @@ public class GameView extends View {
     }
 
     public void loadFigureBitmap(int k, int id) {
-        BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(id);
+        BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(id, theme);
         if (drawable != null)
             figureBitmapMap[k] =  drawable.getBitmap();
     }
@@ -191,7 +198,9 @@ public class GameView extends View {
         Log.d(TAG, "touch event triggered with params" +
                 ": x=" + Integer.toString(x) +
                 ", y=" + Integer.toString(y) +
-                ", action=" + MotionEvent.actionToString(event.getAction())
+                ", action=" + ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) ?
+                        MotionEvent.actionToString(event.getAction()) :
+                        Integer.toString(event.getAction()))
         );
 
         if (x < 0 || y < 0 || x >= boardSize || y >= boardSize)
@@ -203,11 +212,14 @@ public class GameView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN :
                 fieldTouchDowned = true;
+                pressedX = x;
+                pressedY = y;
                 break;
             case MotionEvent.ACTION_MOVE :
-                if (fieldTouchDowned)
+                if (fieldTouchDowned && Math.hypot(x - pressedX, y - pressedY) > 40) {
                     fieldDragged(row, column);
-                fieldTouchDowned = false;
+                    fieldTouchDowned = false;
+                }
                 break;
             case MotionEvent.ACTION_UP :
                 if (fieldTouchDowned)
