@@ -28,6 +28,7 @@ public class GameView extends View {
     public static final int FIGURES_COUNT = 12;
 
     public Desk desk;
+    public Void aVoid;
 
     private Paint whiteFieldPaint, blackFieldPaint, whiteFieldPressedPaint, blackFieldPressedPaint, figurePaint;
     private int fieldSize, boardSize;
