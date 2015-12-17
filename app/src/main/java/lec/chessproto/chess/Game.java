@@ -23,6 +23,8 @@ public abstract class Game {
 
         blackPlayer.game = this;
         blackPlayer.color = Chess.BLACK;
+
+        whitePlayer.onYourTurn();
     }
 
     public interface Listener {
@@ -63,5 +65,9 @@ public abstract class Game {
 
     public static String getColorName(boolean color) {
         return color ? "black" : "white";
+    }
+
+    public Desk getDesk() {
+        return desk;
     }
 }

@@ -1,5 +1,6 @@
 package lec.chessproto;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -7,33 +8,55 @@ import java.util.List;
 
 import lec.chessproto.chess.Chess;
 import lec.chessproto.chess.Desk;
+import lec.chessproto.chess.Game;
 import lec.chessproto.chess.Move;
 import lec.chessproto.chess.Player;
 
-public abstract class GameActivity extends AppCompatActivity  implements Chess.Listener {
+public class GameActivity extends AppCompatActivity  implements Chess.Listener {
 
     protected GameView gameView;
-    protected Chess chess;
+    protected Game game;
 
     protected Player whitePlayer;
     protected Player blackPlayer;
 
-    protected abstract void init();
-    protected abstract GameView.DeskListener getCurrentDeskListener(boolean color);
+    public static final int LOCALGAME = 0;
+    public static final int BLUETOOTH = 1;
+    public static final String TYPE = "type";
+    private int type;
+
+    public static final int CHESS_CLS = 0;
+    public static final int CHESS_360 = 1;
+    public static final String GAME = "game";
+    private int gameid;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        init();
+
         super.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        int type   = intent.getIntExtra(TYPE, LOCALGAME);
+        int gameid = intent.getIntExtra(GAME, CHESS_CLS);
 
         setContentView(R.layout.activity_chess_view);
         gameView = (GameView) findViewById(R.id.chess);
+        if (type == LOCALGAME) {
+            whitePlayer = new LocalPlayer(gameView);
+            blackPlayer = new LocalPlayer(gameView);
+        }
 
-        chess = new Chess(Desk.getClassicStartPosition(), Chess.WHITE, whitePlayer, blackPlayer);
-        chess.setListener(this);
-        gameView.desk = chess.getDesk();
-        gameView.deskListener = getCurrentDeskListener(Chess.WHITE);
-        gameView.invalidate();
+        game = new Chess(gameid == CHESS_CLS ?
+                Desk.getClassicStartPosition() :
+                Desk.getRandomFisherStartPosition(),
+                Chess.WHITE, whitePlayer, blackPlayer
+        );
+
+        game.setListener(this);
+        gameView.desk = game.getDesk();
     }
 
     @Override
@@ -45,7 +68,7 @@ public abstract class GameActivity extends AppCompatActivity  implements Chess.L
     @Override
     public void onMoveExecuted() {
         gameView.markerMoves = null;
-        gameView.deskListener = getCurrentDeskListener(chess.getDesk().getTurn());
         gameView.invalidate();
     }
+
 }

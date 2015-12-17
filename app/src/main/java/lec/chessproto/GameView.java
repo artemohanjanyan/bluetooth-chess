@@ -13,16 +13,19 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import lec.chessproto.chess.Desk;
 import lec.chessproto.chess.Figure;
 import lec.chessproto.chess.Move;
+import lec.chessproto.chess.SimpleMove;
 
 
 public class GameView extends View {
 
     private static final String TAG = "GameView";
+    private static final List<Move> EMPTY_MOVE_LIST = new LinkedList<>();
 
     public static final int FIGURES_COUNT = 12;
 
@@ -30,28 +33,22 @@ public class GameView extends View {
 
     private Paint whiteFieldPaint, blackFieldPaint, whiteFieldPressedPaint, blackFieldPressedPaint, figurePaint;
     private int fieldSize, boardSize;
-    private Rect dstRect, srcRect;
+    private Rect dstRect, srcRect, drgRect;
 
     private Bitmap[] figureBitmapMap;
     private int figureBitmapSize;
 
 
-    private boolean fieldTouchDowned = false;
-    private int pressedColumn = -1, pressedRow = -1;
-    private int pressedX, pressedY;
+    private boolean selected, dragged, touchDowned;
+    private int sRow = -1, sColumn = -1; // selected field position
+    private int dragX, dragY; // dragged figure position
 
     private Resources res;
     private Resources.Theme theme;
 
     public List<Move> markerMoves;
 
-    DeskListener deskListener;
-
-    interface DeskListener {
-        Figure  onFieldDrag(int row, int column);
-        boolean onFiledSelect(int row, int column);
-        void    onFieldDrop(int row, int column);
-    }
+    LocalPlayer localPlayer;
 
 
     public GameView(Context context) {
@@ -89,6 +86,7 @@ public class GameView extends View {
             blackFieldPressedPaint.setColor(res.getColor(R.color.blackFieldPressed));
         }
         figureBitmapMap = new Bitmap[FIGURES_COUNT];
+        markerMoves = EMPTY_MOVE_LIST;
 
         loadFigureBitmap(Figure.WHITE_PAWN.getID()  , R.drawable.white_pawn);
         loadFigureBitmap(Figure.WHITE_KNIGHT.getID(), R.drawable.white_knight);
@@ -106,6 +104,7 @@ public class GameView extends View {
         figureBitmapSize = figureBitmapMap[0].getWidth();
         srcRect = new Rect(0, 0, figureBitmapSize, figureBitmapSize);
         dstRect = new Rect();
+        drgRect = new Rect();
     }
 
     public void loadFigureBitmap(int k, int id) {
@@ -117,13 +116,17 @@ public class GameView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
         int width  = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
         boardSize = Math.min(width, height);
         fieldSize = boardSize / Desk.SIZE;
+
+        drgRect.set(0, 0, 2 * fieldSize, 2 * fieldSize);
+        drgRect.offset(dragX - fieldSize, dragY - fieldSize);
+
+        int measureSpec = MeasureSpec.makeMeasureSpec(boardSize, MeasureSpec.EXACTLY);
+        super.onMeasure(measureSpec, measureSpec);
     }
 
     @Override
@@ -136,14 +139,12 @@ public class GameView extends View {
             }
         }
 
-        if (pressedColumn != -1 && pressedRow != -1) {
-            drawField(canvas, pressedRow, pressedColumn, getFieldPressedPaint(pressedRow, pressedColumn));
+        if (sRow != -1 && sColumn != -1) {
+            drawField(canvas, sRow, sColumn, getFieldPressedPaint(sRow, sColumn));
         }
-        if (markerMoves != null){
-            for (Move m : markerMoves) {
-                int row = m.endRow, column = m.endColumn;
-                drawField(canvas, row, column, getFieldPressedPaint(row, column));
-            }
+        for (Move m : markerMoves) {
+            int row = m.endRow, column = m.endColumn;
+            drawField(canvas, row, column, getFieldPressedPaint(row, column));
         }
 
         if (isInEditMode())
@@ -158,7 +159,7 @@ public class GameView extends View {
         for (int i = Desk.SIZE - 1; i >= 0; i--) {
             for (int  j = 0; j < Desk.SIZE; j++) {
                 Figure figure = desk.getFigure(i, j);
-                if (figure != null) {
+                if (figure != null && !(dragged && i == sRow && j == sColumn)) {
                     Bitmap bitmap = figureBitmapMap[figure.getID()];
                     canvas.drawBitmap(bitmap, srcRect, dstRect, figurePaint);
                 }
@@ -166,8 +167,9 @@ public class GameView extends View {
             }
             dstRect.offset(-boardSize, fieldSize);
         }
-
-
+        if (dragged) {
+            canvas.drawBitmap(figureBitmapMap[desk.getFigure(sRow, sColumn).getID()], srcRect, drgRect, figurePaint);
+        }
     }
 
     Paint getFieldPressedPaint(int row, int column) {
@@ -211,60 +213,63 @@ public class GameView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN :
-                fieldTouchDowned = true;
-                pressedX = x;
-                pressedY = y;
+                trySelect(row, column);
                 break;
             case MotionEvent.ACTION_MOVE :
-                if (fieldTouchDowned && Math.hypot(x - pressedX, y - pressedY) > 40) {
-                    fieldDragged(row, column);
-                    fieldTouchDowned = false;
+                if (selected) {
+                    if (touchDowned) {
+                        touchDowned = false;
+                        startDragFigure(x, y);
+                    } else if (dragged) {
+                        updateDragPos(x, y);
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP :
-                if (fieldTouchDowned)
-                    fieldSelected(row, column);
-                else
-                    fieldDropped(row, column);
+                if (selected) {
+                    if (touchDowned) {
+                        touchDowned = false;
+                        break;
+                    }
+                    localPlayer.moveFigure(new SimpleMove(sRow, sColumn, row, column));
+                    deselect();
+                    dragged = false;
+                }
                 break;
             default:
                 return super.onTouchEvent(event);
         }
-
+        invalidate();
         return true;
     }
 
-
-    private void fieldSelected(int row, int column) {
-        Log.d(TAG, "field selected" +
-                ": row= " + Integer.toString(row) +
-                ", column= " + Integer.toString(column)
-        );
-        if (deskListener == null)
-            return;
-        boolean marked = deskListener.onFiledSelect(row, column);
-        if (marked) {
-            pressedRow = row;
-            pressedColumn = column;
-        } else {
-            pressedRow = -1;
-            pressedColumn = -1;
+    public void trySelect(int row, int column) {
+        if (desk.getFigure(row, column) != null) {
+            markerMoves = localPlayer.chooseFigure(row, column);
+            selected = true;
+            sRow = row;
+            sColumn = column;
+            touchDowned = true;
         }
     }
 
-    private void fieldDragged(int row, int column) {
-        Log.d(TAG, "field dragged" +
-                        ": row= " + Integer.toString(row) +
-                        ", column= " + Integer.toString(column)
-        );
+    public void deselect() {
+        selected = false;
+        markerMoves = EMPTY_MOVE_LIST;
+        sRow = -1;
+        sColumn = -1;
+    }
+    public void startDragFigure(int x, int y) {
+        drgRect.offsetTo(x - fieldSize, y - fieldSize);
+        dragX = x;
+        dragY = y;
+        dragged = true;
     }
 
-    private void fieldDropped(int row, int column) {
-        Log.d(TAG, "field dropped" +
-                        ": row= " + Integer.toString(row) +
-                        ", column= " + Integer.toString(column)
-        );
+    public void updateDragPos(int x, int y) {
+        drgRect.offset(x - dragX, y - dragY);
+        dragX = x;
+        dragY = y;
     }
-
 
 }

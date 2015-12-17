@@ -22,9 +22,7 @@ public class Chess extends Game {
     }
 
 
-    public Desk getDesk() {
-        return desk;
-    }
+
 
     synchronized List<Move> chooseFigure(Player player, int row, int column) {
         if (!(player == whitePlayer || player == blackPlayer) ||
