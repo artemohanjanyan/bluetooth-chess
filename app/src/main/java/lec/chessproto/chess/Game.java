@@ -29,7 +29,7 @@ public abstract class Game {
 
     public interface Listener {
         void onFigureChosen(List<Move> moves);
-        void onMoveExecuted();
+        void onMoveExecuted(Move move);
     }
 
     protected Listener listener;
@@ -59,7 +59,7 @@ public abstract class Game {
             ((player == whitePlayer) ? blackPlayer : whitePlayer).onYourTurn();
         }
         if (listener != null) {
-            listener.onMoveExecuted();
+            listener.onMoveExecuted(move);
         }
     }
 

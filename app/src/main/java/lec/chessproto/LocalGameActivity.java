@@ -9,5 +9,7 @@ public class LocalGameActivity extends GameActivity {
     protected void initPlayers() {
         whitePlayer = new LocalPlayer(gameView);
         blackPlayer = new LocalPlayer(gameView);
+
+        onPlayersInitialized();
     }
 }

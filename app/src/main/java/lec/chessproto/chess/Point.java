@@ -19,4 +19,5 @@ final public class Point {
         row += drow;
         column += dcolumn;
     }
+
 }

@@ -25,30 +25,31 @@ public abstract class GameActivity extends AppCompatActivity  implements Chess.L
     public static final int CHESS_960 = 1;
     public static final String GAME = "game";
 
+    protected Intent initialIntent;
 
     protected abstract void initPlayers();
+
+    private Figure[][] f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
-        Intent intent = getIntent();
-        int gameid = intent.getIntExtra(GAME, CHESS_CLS);
-
+        initialIntent = getIntent();
+        int gameid = initialIntent.getIntExtra(GAME, CHESS_CLS);
         setContentView(R.layout.activity_chess_view);
         gameView = (GameView) findViewById(R.id.chess);
+
         initPlayers();
-        Figure[][] f;
+
+
         switch (gameid) {
             case CHESS_CLS : f = Desk.getClassicStartPosition(); break;
             case CHESS_960: f = Desk.getRandomFisherStartPosition(); break;
             default: throw new RuntimeException("this game doesn't supported");
         }
-        game = new Chess(f, Chess.WHITE, whitePlayer, blackPlayer);
 
-        game.setListener(this);
-        gameView.desk = game.getDesk();
     }
 
     @Override
@@ -58,9 +59,15 @@ public abstract class GameActivity extends AppCompatActivity  implements Chess.L
     }
 
     @Override
-    public void onMoveExecuted() {
+    public void onMoveExecuted(Move move) {
         gameView.markerMoves = null;
         gameView.invalidate();
     }
 
+    protected void onPlayersInitialized() {
+        game = new Chess(f, Chess.WHITE, whitePlayer, blackPlayer);
+
+        game.setListener(this);
+        gameView.desk = game.getDesk();
+    }
 }

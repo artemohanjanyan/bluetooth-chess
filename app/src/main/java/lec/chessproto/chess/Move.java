@@ -44,4 +44,25 @@ public abstract class Move {
         return  this.startRow == other.startRow && this.startColumn == other.startColumn &&
                 this.endRow == other.endRow && this.endColumn == other.endColumn;
     }
+
+    public abstract byte[] toBytes();
+
+    public static byte fieldToByte(int row, int column) {
+        return (byte)((row << 3) | column);
+    }
+
+    public static Point byteToField(byte b) {
+        return new Point((b >> 3) & 0b111, b & 0b111);
+    }
+
+
+    public static Move getMove(int bytes, byte[] buffer) {
+        if (bytes < 3)
+            throw new RuntimeException("illegal move inner params");
+
+        Point s = byteToField(buffer[1]);
+        Point f = byteToField(buffer[2]);
+        return new SimpleMove(s.row, s.column, f.row, f.column);
+    }
+
 }

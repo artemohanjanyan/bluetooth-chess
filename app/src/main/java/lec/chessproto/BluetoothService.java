@@ -127,17 +127,17 @@ public class BluetoothService extends Service {
         connectThread.start();
     }
 
-    public interface OnMessageReceived {
+    public interface OnMessageReceivedListener {
         void process(int bytes, byte[] buffer);
     }
-    private OnMessageReceived onMessageReceived;
+    private OnMessageReceivedListener onMessageReceivedListener;
     ArrayList<Integer> sizes = new ArrayList<>();
     ArrayList<byte[]> cache = new ArrayList<>();
-    public void setOnMessageReceived(OnMessageReceived onMessageReceived) {
-        this.onMessageReceived = onMessageReceived;
+    public void setOnMessageReceivedListener(OnMessageReceivedListener onMessageReceivedListener) {
+        this.onMessageReceivedListener = onMessageReceivedListener;
 
         for (int i = 0; i < cache.size(); ++i) {
-            onMessageReceived.process(sizes.get(i), cache.get(i));
+            onMessageReceivedListener.process(sizes.get(i), cache.get(i));
         }
         cache.clear();
         sizes.clear();
@@ -288,7 +288,7 @@ public class BluetoothService extends Service {
                     bytes = inputStream.read(buffer);
                     Log.d(TAG, "read");
                     try {
-                        onMessageReceived.process(bytes, buffer);
+                        onMessageReceivedListener.process(bytes, buffer);
                     } catch (NullPointerException ignored) {
                         sizes.add(bytes);
                         cache.add(buffer);
