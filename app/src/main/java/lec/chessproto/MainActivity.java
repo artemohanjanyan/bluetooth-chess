@@ -62,8 +62,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        if (btService != null && shouldLaunch) {
-            btService.showNotification(MainActivity.class, getString(R.string.app_name));
+//        if (btService != null && shouldLaunch) {
+//            btService.showNotification(MainActivity.class, getString(R.string.app_name));
+//        }
+
+        if (btService != null) {
+            btService.showNotification(MainActivity.class, getString(R.string.chat_name));
         }
     }
 
@@ -128,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE),
                         REQUEST_ENABLE_BT);
             } else if (!btService.isConnected()) {
-                shouldLaunch = false;
+                //shouldLaunch = false;
                 startActivityForResult(new Intent(MainActivity.this, DeviceChooser.class),
                         REQUEST_CONNECT);
             }
@@ -157,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
             case REQUEST_ENABLE_BT:
                 switch (resultCode) {
                     case RESULT_OK:
-                        shouldLaunch = false;
+                        //shouldLaunch = false;
                         startActivityForResult(new Intent(MainActivity.this, DeviceChooser.class),
                                 REQUEST_CONNECT);
                         break;

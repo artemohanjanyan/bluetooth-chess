@@ -57,10 +57,22 @@ public class DeviceChooser extends AppCompatActivity {
         registerReceiver(broadcastReceiver, intentFilter);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (btService != null) {
+            btService.hideNotification();
+        }
+    }
+
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();
+
+            btService.hideNotification();
+
             btService.setOnConnected(new BluetoothService.OnConnected() {
                 @Override
                 public void success() {
@@ -157,9 +169,16 @@ public class DeviceChooser extends AppCompatActivity {
     };
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        if (btService != null) {
+            btService.showNotification(DeviceChooser.class, getString(R.string.chat_name));
+        }
 
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
         if (btService.getBluetoothAdapter() != null) {
             btService.getBluetoothAdapter().cancelDiscovery();
         }
@@ -167,5 +186,7 @@ public class DeviceChooser extends AppCompatActivity {
         unregisterReceiver(broadcastReceiver);
 
         unbindService(connection);
+
+        super.onDestroy();
     }
 }

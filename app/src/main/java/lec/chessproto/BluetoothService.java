@@ -152,6 +152,8 @@ public class BluetoothService extends Service {
     }
 
     public void showNotification(Class<?> aClass, String string) {
+        Log.d(TAG, "notification shown");
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentTitle(string)
                 .setContentText(string)
@@ -163,6 +165,8 @@ public class BluetoothService extends Service {
     }
 
     public void hideNotification() {
+        Log.d(TAG, "notification hidden");
+
         stopForeground(true);
     }
 
