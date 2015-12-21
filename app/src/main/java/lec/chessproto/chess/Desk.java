@@ -1,5 +1,6 @@
 package lec.chessproto.chess;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -7,6 +8,34 @@ import java.util.List;
 import java.util.Random;
 
 public class Desk {
+
+    private class FieldChangesScope {
+        List<Point> fields;
+        Figure[] figures;
+
+        public FieldChangesScope(List<Point> fields) {
+            this.fields = fields;
+            figures = new Figure[fields.size()];
+            for (int i = 0; i < fields.size(); i++) {
+                Point field = fields.get(i);
+                figures[i] = Desk.this.d[field.row][field.column];
+            }
+        }
+
+        void change() {
+            Figure[][] f = Desk.this.d;
+            int i = 0;
+            while (i < fields.size()) {
+                Point field = fields.get(i);
+                Figure figure = f [field.row][field.column];
+                f[field.row][field.column] = figures[i];
+                figures[i] = figure;
+                i++;
+            }
+        }
+    }
+
+    ArrayList<FieldChangesScope> undoScopes, redoScopes;
 
     public static final int SIZE = 8;
 
@@ -112,12 +141,39 @@ public class Desk {
             System.arraycopy(d[i], 0, fCopy[i], 0, Desk.SIZE);
         }
         Desk ret = new Desk(game, fCopy, turn);
-        move.execute(ret);
-
-        if (move.terminal) {
-            ret.nextTurn();
-        }
+        ret.executeMove(move);
 
         return ret;
     }
+
+    boolean executeMove(Move move) {
+        FieldChangesScope scope = new FieldChangesScope(move.getChangedFields());
+        undoScopes.add(scope);
+        move.execute(this);
+        if (move.terminal) {
+            nextTurn();
+        }
+        return true;
+    }
+
+    boolean undoMove() {
+        return moveFieldChangeScope(undoScopes, redoScopes);
+    }
+
+    boolean redoMove() {
+        return moveFieldChangeScope(undoScopes, redoScopes);
+    }
+
+
+    boolean moveFieldChangeScope(ArrayList<FieldChangesScope> from, ArrayList<FieldChangesScope> to) {
+        if (from.isEmpty()) {
+            return false;
+        }
+        FieldChangesScope scope = from.remove(from.size() - 1);
+        scope.change();
+        to.add(scope);
+        return true;
+    }
+
+
 }

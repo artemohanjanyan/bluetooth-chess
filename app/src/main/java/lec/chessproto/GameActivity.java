@@ -13,7 +13,7 @@ import lec.chessproto.chess.Game;
 import lec.chessproto.chess.Move;
 import lec.chessproto.chess.Player;
 
-public class GameActivity extends AppCompatActivity  implements Chess.Listener {
+public abstract class GameActivity extends AppCompatActivity  implements Chess.Listener {
 
     protected GameView gameView;
     protected Game game;
@@ -21,18 +21,12 @@ public class GameActivity extends AppCompatActivity  implements Chess.Listener {
     protected Player whitePlayer;
     protected Player blackPlayer;
 
-    public static final int LOCALGAME = 0;
-    public static final int BLUETOOTH = 1;
-    public static final String TYPE = "type";
-    private int type;
-
     public static final int CHESS_CLS = 0;
     public static final int CHESS_960 = 1;
     public static final String GAME = "game";
-    private int gameid;
 
 
-
+    protected abstract void initPlayers();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +34,11 @@ public class GameActivity extends AppCompatActivity  implements Chess.Listener {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        int type   = intent.getIntExtra(TYPE, LOCALGAME);
         int gameid = intent.getIntExtra(GAME, CHESS_CLS);
 
         setContentView(R.layout.activity_chess_view);
         gameView = (GameView) findViewById(R.id.chess);
-        if (type == LOCALGAME) {
-            whitePlayer = new LocalPlayer(gameView);
-            blackPlayer = new LocalPlayer(gameView);
-        }
+        initPlayers();
         Figure[][] f;
         switch (gameid) {
             case CHESS_CLS : f = Desk.getClassicStartPosition(); break;
