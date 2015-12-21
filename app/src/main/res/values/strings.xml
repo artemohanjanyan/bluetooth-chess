@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Chess Proto</string>
+
+    <string name="chat_name">Chat</string>
+
+    <string name="bluetooth_absent">Device is not supported</string>
+
+    <string name="scan_for_devices">Scan for devices</string>
+    <string name="scanning_for_devices">Scanning...</string>
+    <string name="n_devices_found_suffix">devices found</string>
+
+    <string name="enable_discoverable">Make discoverable</string>
+
+    <string name="send">Send</string>
+    <string name="close">Close</string>
 </resources>
