@@ -8,6 +8,7 @@ import java.util.List;
 
 import lec.chessproto.chess.Chess;
 import lec.chessproto.chess.Desk;
+import lec.chessproto.chess.Figure;
 import lec.chessproto.chess.Game;
 import lec.chessproto.chess.Move;
 import lec.chessproto.chess.Player;
@@ -26,7 +27,7 @@ public class GameActivity extends AppCompatActivity  implements Chess.Listener {
     private int type;
 
     public static final int CHESS_CLS = 0;
-    public static final int CHESS_360 = 1;
+    public static final int CHESS_960 = 1;
     public static final String GAME = "game";
     private int gameid;
 
@@ -48,12 +49,13 @@ public class GameActivity extends AppCompatActivity  implements Chess.Listener {
             whitePlayer = new LocalPlayer(gameView);
             blackPlayer = new LocalPlayer(gameView);
         }
-
-        game = new Chess(gameid == CHESS_CLS ?
-                Desk.getClassicStartPosition() :
-                Desk.getRandomFisherStartPosition(),
-                Chess.WHITE, whitePlayer, blackPlayer
-        );
+        Figure[][] f;
+        switch (gameid) {
+            case CHESS_CLS : f = Desk.getClassicStartPosition(); break;
+            case CHESS_960: f = Desk.getRandomFisherStartPosition(); break;
+            default: throw new RuntimeException("this game doesn't supported");
+        }
+        game = new Chess(f, Chess.WHITE, whitePlayer, blackPlayer);
 
         game.setListener(this);
         gameView.desk = game.getDesk();
