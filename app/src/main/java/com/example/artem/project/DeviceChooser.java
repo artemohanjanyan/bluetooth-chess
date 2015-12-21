@@ -133,7 +133,7 @@ public class DeviceChooser extends AppCompatActivity {
             btService.getBluetoothAdapter().cancelDiscovery();
 
             String str = ((TextView) view).getText().toString();
-            String address = str.substring(str.length() - 17);
+            String address = str.substring(str.length() - 17); // Length of address
 
             makeToast(address);
 

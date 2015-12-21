@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 /**
- * Created by artem on 12/13/15.
  * Service handling bluetooth interaction
  */
 public class BluetoothService extends Service {
@@ -171,7 +170,7 @@ public class BluetoothService extends Service {
     // Public methods
     //
 
-    private void connected(BluetoothSocket socket) {
+    private synchronized void connected(BluetoothSocket socket) {
         this.btSocket = socket;
 
         if (acceptThread != null) {

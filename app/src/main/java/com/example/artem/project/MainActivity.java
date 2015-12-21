@@ -22,9 +22,9 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int REQUEST_CONNECT = 1;
-    private final int REQUEST_ENABLE_BT = 2;
-    private final int HANDLER_MESSAGE_GET = 1;
+    private static final int REQUEST_CONNECT = 1;
+    private static final int REQUEST_ENABLE_BT = 2;
+    private static final int HANDLER_MESSAGE_GET = 3;
 
     private ArrayAdapter<String> arrayAdapter;
     private EditText editText;
@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothService btService;
 
     boolean shouldLaunch = true;
-    boolean shouldClose = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,15 +68,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void startActivity(Intent intent) {
+        super.startActivity(intent);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 
         if (handler != null) {
             handler = null;
-        }
-
-        if (btService != null && shouldClose) {
-            btService.stopSelf();
         }
 
         unbindService(connection);
@@ -91,7 +91,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        shouldClose = true;
+        //shouldClose = true;
+        if (btService != null) {
+            btService.stopSelf();
+            btService = null;
+        }
         finish();
         return super.onOptionsItemSelected(item);
     }
@@ -149,16 +153,19 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
                 break;
+
             case REQUEST_ENABLE_BT:
                 switch (resultCode) {
                     case RESULT_OK:
-                        if (!btService.isConnected()) {
-                            startActivityForResult(new Intent(MainActivity.this, DeviceChooser.class),
-                                    REQUEST_CONNECT);
-                        }
+                        shouldLaunch = false;
+                        startActivityForResult(new Intent(MainActivity.this, DeviceChooser.class),
+                                REQUEST_CONNECT);
                         break;
 
                     default:
+                        btService.stopSelf();
+                        btService = null;
+                        // TODO toast
                         finish();
                         break;
                 }
