@@ -1,8 +1,5 @@
 package lec.chessproto.chess;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -12,9 +9,11 @@ public class Desk {
     private class FieldChangesScope {
         List<Point> fields;
         Figure[] figures;
+        boolean turnChanged;
 
-        public FieldChangesScope(List<Point> fields) {
+        public FieldChangesScope(List<Point> fields, boolean turnChanged) {
             this.fields = fields;
+            this.turnChanged = turnChanged;
             figures = new Figure[fields.size()];
             for (int i = 0; i < fields.size(); i++) {
                 Point field = fields.get(i);
@@ -23,19 +22,22 @@ public class Desk {
         }
 
         void change() {
-            Figure[][] f = Desk.this.d;
+            Desk desk = Desk.this;
             int i = 0;
             while (i < fields.size()) {
                 Point field = fields.get(i);
-                Figure figure = f [field.row][field.column];
-                f[field.row][field.column] = figures[i];
+                Figure figure = desk.d [field.row][field.column];
+                desk.d[field.row][field.column] = figures[i];
                 figures[i] = figure;
                 i++;
+            }
+            if (turnChanged) {
+                desk.switchTurn();
             }
         }
     }
 
-    ArrayList<FieldChangesScope> undoScopes, redoScopes;
+    LinkedList<FieldChangesScope> undoScopes, redoScopes;
 
     public static final int SIZE = 8;
 
@@ -120,6 +122,9 @@ public class Desk {
         this.game = game;
         this.d = d;
         this.turn = turn;
+
+        undoScopes = new LinkedList<>();
+        redoScopes = new LinkedList<>();
     }
 
     public Figure getFigure(int row, int column) {
@@ -130,7 +135,7 @@ public class Desk {
         return turn;
     }
 
-    void nextTurn() {
+    void switchTurn() {
         turn = !turn;
     }
 
@@ -147,11 +152,11 @@ public class Desk {
     }
 
     boolean executeMove(Move move) {
-        FieldChangesScope scope = new FieldChangesScope(move.getChangedFields());
+        FieldChangesScope scope = new FieldChangesScope(move.getChangedFields(), move.terminal);
         undoScopes.add(scope);
         move.execute(this);
         if (move.terminal) {
-            nextTurn();
+            switchTurn();
         }
         return true;
     }
@@ -165,7 +170,7 @@ public class Desk {
     }
 
 
-    boolean moveFieldChangeScope(ArrayList<FieldChangesScope> from, ArrayList<FieldChangesScope> to) {
+    boolean moveFieldChangeScope(LinkedList<FieldChangesScope> from, LinkedList<FieldChangesScope> to) {
         if (from.isEmpty()) {
             return false;
         }

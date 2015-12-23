@@ -3,6 +3,8 @@ package lec.chessproto;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -15,7 +17,11 @@ import lec.chessproto.chess.Player;
 
 public abstract class GameActivity extends AppCompatActivity  implements Chess.Listener {
 
+    private static final String TAG = "GameActivity";
+
     protected GameView gameView;
+    protected TextView gameOverText;
+
     protected Game game;
 
     protected Player whitePlayer;
@@ -40,15 +46,15 @@ public abstract class GameActivity extends AppCompatActivity  implements Chess.L
         int gameid = initialIntent.getIntExtra(GAME, CHESS_CLS);
         setContentView(R.layout.activity_chess_view);
         gameView = (GameView) findViewById(R.id.chess);
-
-        initPlayers();
-
+        gameOverText = (TextView) findViewById(R.id.game_over_text);
 
         switch (gameid) {
             case CHESS_CLS : f = Desk.getClassicStartPosition(); break;
             case CHESS_960: f = Desk.getRandomFisherStartPosition(); break;
             default: throw new RuntimeException("this game doesn't supported");
         }
+
+        initPlayers();
 
     }
 
@@ -69,5 +75,12 @@ public abstract class GameActivity extends AppCompatActivity  implements Chess.L
 
         game.setListener(this);
         gameView.desk = game.getDesk();
+    }
+
+    @Override
+    public void onGameOver(boolean winner) {
+        String str = "Game over : " + Game.getColorName(winner) + " wins";
+        gameOverText.setText(str);
+        Log.d(TAG, str);
     }
 }

@@ -26,4 +26,9 @@ public class LocalPlayer extends Player  {
         gameView.localPlayer = this;
         Log.d(TAG, Game.getColorName(getColor()) + " player turn started");
     }
+
+    @Override
+    public void gameOver(boolean isWinner) {
+
+    }
 }

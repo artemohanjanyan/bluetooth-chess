@@ -26,4 +26,5 @@ public abstract class Player  {
 
     public abstract void onYourTurn();
 
+    public abstract void gameOver(boolean isWinner);
 }

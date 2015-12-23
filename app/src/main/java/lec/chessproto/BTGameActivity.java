@@ -21,6 +21,7 @@ public class BtGameActivity extends GameActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();
+            //TODO : check for connection with another device
             BtLocalPlayer btLocalPlayer = new BtLocalPlayer(gameView, btService);
             RemotePlayer remotePlayer = new RemotePlayer(btService);
             whitePlayer = localPlayerColor ? remotePlayer : btLocalPlayer;
@@ -43,7 +44,6 @@ public class BtGameActivity extends GameActivity {
         startService(btServiceIntent);
         bindService(btServiceIntent, connection, Context.BIND_AUTO_CREATE);
     }
-
 
 
 }

@@ -30,6 +30,7 @@ public abstract class Game {
     public interface Listener {
         void onFigureChosen(List<Move> moves);
         void onMoveExecuted(Move move);
+        void onGameOver(boolean winner);
     }
 
     protected Listener listener;
@@ -55,7 +56,6 @@ public abstract class Game {
 
     protected synchronized void onMoveExecution(Player player, Move move) {
         if (move.terminal) {
-            desk.nextTurn();
             ((player == whitePlayer) ? blackPlayer : whitePlayer).onYourTurn();
         }
         if (listener != null) {
@@ -69,5 +69,15 @@ public abstract class Game {
 
     public Desk getDesk() {
         return desk;
+    }
+
+    protected void gameOver(boolean _winner) {
+        Player winner = (_winner) ? blackPlayer : whitePlayer;
+        Player loser  = (_winner) ? whitePlayer : blackPlayer;
+        winner.gameOver(true);
+        loser.gameOver(true);
+        if (listener != null) {
+            listener.onGameOver(_winner);
+        }
     }
 }

@@ -7,36 +7,61 @@ import java.util.List;
 
 public class Chess extends Game {
 
-    int cfRow, cfColumn;
 
 
-    private List<Move>[][] deskMoves;
+    private List<MoveTree>[][] deskMoves;
 
+    @SuppressWarnings("unchecked")
     public Chess(Figure[][] d, boolean turn, Player whitePlayer, Player blackPlayer) {
         super(d, turn, whitePlayer, blackPlayer);
 
-        cfRow = -1;
-        cfColumn = -1;
+        List<Move>[][] firstMoves = genMoves();
+        deskMoves = new List[Desk.SIZE][Desk.SIZE];
+        genDeskMoves(firstMoves);
 
-        deskMoves = genMoves(desk, WHITE);
+
+    }
+
+    private static class MoveTree {
+        Move move;
+
+        List<Move>[][] nextMoves;
+
+        public MoveTree(Move move) {
+            this.move = move;
+        }
+
+        public MoveTree(Move move, List<Move>[][] nextMoves) {
+            this.move = move;
+            this.nextMoves = nextMoves;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            MoveTree moveTree = (MoveTree) o;
+
+            return move.equals(moveTree.move);
+        }
     }
 
 
-
-
     synchronized List<Move> chooseFigure(Player player, int row, int column) {
-        if (!(player == whitePlayer || player == blackPlayer) ||
+        List<MoveTree> moveTrees = deskMoves[row][column];
+        if (moveTrees == null ||
+                !(player == whitePlayer || player == blackPlayer) ||
                 player.color ^ desk.turn ||
                 desk.d[row][column] == null ||
                 player.color ^ desk.d[row][column].getColor()) {
-            return new LinkedList<>();
+            return new ArrayList<>();
         }
+        List<Move> moves = new ArrayList<>(moveTrees.size());
 
-        cfRow = row;
-        cfColumn = column;
-        List<Move> moves = desk.d[row][column].getMoves(desk, row, column);
-
-        //TODO :: check are moves valid
+        for (MoveTree m : moveTrees) {
+            moves.add(m.move);
+        }
 
         if (listener != null) {
             listener.onFigureChosen(moves);
@@ -46,24 +71,35 @@ public class Chess extends Game {
     }
 
     synchronized boolean  moveFigure(Player player, Move move) {
-        if (!(player == whitePlayer || player == blackPlayer)
-                || player.color ^ desk.turn
-                || deskMoves[move.startRow][move.startColumn] == null
-                ||!deskMoves[move.startRow][move.startColumn].contains(move)) {
+        if (deskMoves[move.startRow][move.startColumn] == null) {
             return false;
         }
-        boolean isExecuted = tryExecute(move);
-        if (isExecuted) onMoveExecution(player, move);
-        return isExecuted;
+        int index = deskMoves[move.startRow][move.startColumn].indexOf(new MoveTree(move));
+        if (!(player == whitePlayer || player == blackPlayer)
+                || player.color ^ desk.turn
+                || index == -1) {
+            return false;
+        }
+        desk.executeMove(move);
+        List<Move>[][] nextMoves = deskMoves[move.startRow][move.startColumn].get(index).nextMoves;
+        boolean isMate = !genDeskMoves(nextMoves);
+
+        onMoveExecution(player, move);
+
+        if (isMate) {
+            gameOver(!desk.turn);
+        }
+
+        return true;
     }
 
     @SuppressWarnings("unchecked")
-    static List<Move>[][] genMoves(Desk desk, boolean color) {
+    private List<Move>[][] genMoves() {
         List<Move>[][] ret = new LinkedList[Desk.SIZE][Desk.SIZE];
 
         for (int i = 0; i < Desk.SIZE; i++) {
             for (int j = 0; j < Desk.SIZE; j++) {
-                if (desk.d[i][j] != null  && desk.d[i][j].color == color) {
+                if (desk.d[i][j] != null  && desk.d[i][j].color == desk.turn) {
                     ret[i][j] = desk.d[i][j].getMoves(desk, i, j);
                 }
             }
@@ -72,16 +108,11 @@ public class Chess extends Game {
         return ret;
     }
 
-    private boolean tryExecute(Move move) {
-        List<Point> changed = move.getChangedFields();
-        Figure[] savedState = new Figure[changed.size()];
-        for (int i = 0; i < savedState.length; i++) {
-            Point p = changed.get(i);
-            savedState[i] = desk.d[p.row][p.column];
-        }
-        Figure king = desk.turn ? Figure.BLACK_KING : Figure.WHITE_KING;
-        move.execute(desk);
-        List<Move>[][] moves = genMoves(desk, !desk.turn);
+    private boolean isCorrect;
+
+    private List<Move>[][] checkCorrect() {
+        Figure king = desk.turn ? Figure.WHITE_KING : Figure.BLACK_KING;
+        List<Move>[][] moves = genMoves();
 
         for (int i = 0; i < Desk.SIZE; i++) {
             for (int j = 0; j < Desk.SIZE; j++) {
@@ -90,16 +121,37 @@ public class Chess extends Game {
                 }
                 for (Move pmove : moves[i][j]) {
                     if (desk.d[pmove.endRow][pmove.endColumn] == king) {
-                        for (int k = 0; k < savedState.length; k++) {
-                            desk.d[changed.get(k).row][changed.get(k).column] = savedState[k];
-                        }
-                        return false;
+                        isCorrect =  false;
+                        return moves;
                     }
                 }
             }
         }
-        deskMoves = moves;
-        return true;
+        isCorrect =  true;
+        return moves;
+    }
+
+    private boolean genDeskMoves(List<Move>[][] moves) {
+        boolean hasMoves = false;
+        for (int i = 0; i < Desk.SIZE; i++) {
+            for (int j = 0; j < Desk.SIZE; j++) {
+                if (moves[i][j] == null) {
+                    deskMoves[i][j] = null;
+                    continue;
+                }
+                deskMoves[i][j] = new ArrayList<>(moves[i][j].size());
+                for (Move m : moves[i][j]) {
+                    desk.executeMove(m);
+                    List<Move>[][] generatedMoves = checkCorrect();
+                    if (isCorrect) {
+                        deskMoves[i][j].add(new MoveTree(m, generatedMoves));
+                        hasMoves = true;
+                    }
+                    desk.undoMove();
+                }
+            }
+        }
+        return hasMoves;
     }
 
 }

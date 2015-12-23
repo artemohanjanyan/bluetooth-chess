@@ -21,4 +21,8 @@ public class RemotePlayer extends Player implements  BluetoothService.OnMessageR
     public void onYourTurn() {
 
     }
+
+    @Override
+    public void gameOver(boolean isWinner) {
+    }
 }

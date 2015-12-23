@@ -5,12 +5,17 @@
 
     <string name="bluetooth_absent">Device is not supported</string>
 
+    <!-- Device chooser -->
     <string name="scan_for_devices">Scan for devices</string>
     <string name="scanning_for_devices">Scanning...</string>
     <string name="n_devices_found_suffix">devices found</string>
-
     <string name="enable_discoverable">Make discoverable</string>
 
+    <!-- Chat -->
     <string name="send">Send</string>
     <string name="close">Close</string>
+
+    <!-- Menu -->
+    <string name="local_game">Local game</string>
+    <string name="bt_game">BT game</string>
 </resources>

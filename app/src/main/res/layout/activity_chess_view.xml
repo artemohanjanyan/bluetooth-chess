@@ -11,4 +11,10 @@
         android:layout_height="match_parent"
         android:id="@+id/chess"
     />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|bottom"
+        android:id="@+id/game_over_text" />
 </FrameLayout>
