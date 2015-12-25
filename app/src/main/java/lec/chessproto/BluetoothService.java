@@ -179,6 +179,10 @@ public class BluetoothService extends Service {
         regCount = newRegCount;
     }
 
+    public boolean isServer() {
+        return isServer;
+    }
+
     private void showNotification(Class<?> aClass, String string) {
         Log.d(TAG, "notification shown");
 
@@ -200,8 +204,12 @@ public class BluetoothService extends Service {
         stopForeground(true);
     }
 
-    private synchronized void connected(BluetoothSocket socket) {
+    private boolean isServer;
+
+    private synchronized void connected(BluetoothSocket socket, boolean isServer) {
         this.btSocket = socket;
+
+        this.isServer = isServer;
 
         if (acceptThread != null) {
             acceptThread.cancel();
@@ -237,7 +245,7 @@ public class BluetoothService extends Service {
                     break;
                 }
                 if (socket != null) {
-                    connected(socket);
+                    connected(socket, true);
                     try {
                         serverSocket.close();
                     } catch (IOException ignored) { }
@@ -278,7 +286,7 @@ public class BluetoothService extends Service {
 
             BluetoothSocket tmp = socket;
             socket = null;
-            connected(tmp);
+            connected(tmp, false);
         }
 
         public void cancel() {

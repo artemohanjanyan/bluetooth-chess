@@ -142,11 +142,12 @@ public class GameView extends View {
         if (sRow != -1 && sColumn != -1) {
             drawField(canvas, sRow, sColumn, getFieldPressedPaint(sRow, sColumn));
         }
-        for (Move m : markerMoves) {
-            int row = m.endRow, column = m.endColumn;
-            drawField(canvas, row, column, getFieldPressedPaint(row, column));
+        if (markerMoves != null) {
+            for (Move m : markerMoves) {
+                int row = m.endRow, column = m.endColumn;
+                drawField(canvas, row, column, getFieldPressedPaint(row, column));
+            }
         }
-
         if (isInEditMode())
             return;
 
