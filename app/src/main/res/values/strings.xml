@@ -7,6 +7,8 @@
 
     <string name="bluetooth_absent">Device is not supported</string>
 
+    <string name="bluetooth_request">Enabled bluetooth required</string>
+
     <!-- Device chooser -->
     <string name="scan_for_devices">Scan for devices</string>
     <string name="scanning_for_devices">Scanning...</string>

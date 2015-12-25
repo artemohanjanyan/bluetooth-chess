@@ -96,24 +96,22 @@ public class TmpActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_ENABLE_BT:
                 if (resultCode == RESULT_CANCELED) {
-                    // TODO toast
+                    Toast.makeText(TmpActivity.this,
+                            R.string.bluetooth_request, Toast.LENGTH_LONG).show();
                     finish();
                     break;
                 }
-                startActivityForResult(new Intent(TmpActivity.this, DeviceChooser.class),
+                startActivityForResult(new Intent(this, DeviceChooser.class),
                         REQUEST_CONNECT);
                 break;
 
             case REQUEST_CONNECT:
                 if (resultCode != RESULT_OK) {
-                    // TODO ???
                     finish();
+                    break;
                 }
-                // TODO start game
-                //startActivityForResult(new Intent(TmpActivity.this, ???),
-                //      REQUEST_PLAY);
-                Intent intent = new Intent(TmpActivity.this, BtGameActivity.class);
-                startActivityForResult(intent, REQUEST_PLAY);
+                startActivityForResult(new Intent(this, BtGameActivity.class),
+                        REQUEST_PLAY);
                 finish();
                 break;
 
