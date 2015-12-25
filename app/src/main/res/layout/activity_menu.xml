@@ -20,14 +20,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/local_game" />
+            android:text="@string/local_game"
+            style="?android:attr/buttonBarButtonStyle"/>
 
         <Button
             android:id="@+id/bt_game_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/bt_game"/>
+            android:text="@string/bt_game"
+            style="?android:attr/buttonBarButtonStyle"/>
     </LinearLayout>
 
 </FrameLayout>

@@ -84,10 +84,6 @@ public class BluetoothService extends Service {
     }
     private final IBinder binder = new BtBinder();
 
-    //
-    // Public methods
-    //
-
     public static class BtUnavailableException extends Exception {
         public BtUnavailableException() {
             super("bluetooth is not supported");
@@ -151,24 +147,58 @@ public class BluetoothService extends Service {
         return btSocket;
     }
 
-    public void showNotification(Class<?> aClass, String string) {
+    /*
+        Called to indicate that activity is in foreground and notification is unnecessary
+     */
+    public void registerActivity(Class<?> activityClass, String string) {
+        lastClass = activityClass;
+        lastString = string;
+        changeRegCount(1);
+    }
+
+    /*
+        Called to indicate that activity is no longer visible and notification may be needed
+     */
+    public void unregisterActivity() {
+        changeRegCount(-1);
+    }
+
+    private int regCount = 0;
+    private Class<?> lastClass;
+    private String lastString;
+    private synchronized void changeRegCount(int d) {
+        int newRegCount = regCount + d;
+
+        if (newRegCount == 0 && regCount != 0) {
+            showNotification(lastClass, lastString);
+        }
+        if (newRegCount != 0 && regCount == 0) {
+            hideNotification();
+        }
+
+        regCount = newRegCount;
+    }
+
+    private void showNotification(Class<?> aClass, String string) {
+        Log.d(TAG, "notification shown");
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setContentTitle(string)
                 .setContentText(string)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentIntent(PendingIntent.getActivity(this, 0,
-                        new Intent(this, aClass), 0));
+                        new Intent(this, aClass).setFlags(
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                        0));
 
         startForeground(NOTIFICATION_ID, builder.build());
     }
 
-    public void hideNotification() {
+    private void hideNotification() {
+        Log.d(TAG, "notification hidden");
+
         stopForeground(true);
     }
-
-    //
-    // Public methods
-    //
 
     private synchronized void connected(BluetoothSocket socket) {
         this.btSocket = socket;

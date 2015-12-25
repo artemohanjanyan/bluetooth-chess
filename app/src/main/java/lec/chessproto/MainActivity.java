@@ -31,8 +31,6 @@ public class MainActivity extends AppCompatActivity {
 
     private BluetoothService btService;
 
-    boolean shouldLaunch = true;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         if (btService != null) {
-            btService.hideNotification();
+            btService.registerActivity(MainActivity.class, getString(R.string.chat_name));
         }
     }
 
@@ -62,8 +60,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        if (btService != null && shouldLaunch) {
-            btService.showNotification(MainActivity.class, getString(R.string.app_name));
+        if (btService != null) {
+            btService.unregisterActivity();
         }
     }
 
@@ -91,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //shouldClose = true;
         if (btService != null) {
             btService.stopSelf();
             btService = null;
@@ -105,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();
 
-            btService.hideNotification();
+            btService.registerActivity(MainActivity.class, getString(R.string.chat_name));
 
             btService.setOnMessageReceivedListener(new BluetoothService.OnMessageReceivedListener() {
                 @Override
@@ -128,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE),
                         REQUEST_ENABLE_BT);
             } else if (!btService.isConnected()) {
-                shouldLaunch = false;
                 startActivityForResult(new Intent(MainActivity.this, DeviceChooser.class),
                         REQUEST_CONNECT);
             }
@@ -146,7 +142,6 @@ public class MainActivity extends AppCompatActivity {
 
         switch (requestCode) {
             case REQUEST_CONNECT:
-                shouldLaunch = true;
                 switch (resultCode) {
                     case RESULT_CANCELED:
                         finish();
@@ -157,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
             case REQUEST_ENABLE_BT:
                 switch (resultCode) {
                     case RESULT_OK:
-                        shouldLaunch = false;
                         startActivityForResult(new Intent(MainActivity.this, DeviceChooser.class),
                                 REQUEST_CONNECT);
                         break;
