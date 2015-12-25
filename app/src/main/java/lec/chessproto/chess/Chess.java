@@ -196,6 +196,10 @@ public class Chess extends Game {
                             return moves;
                         }
                     }
+                    if (desk.d[m.endRow][m.endColumn] == (desk.turn ? Figure.WHITE_KING : Figure.BLACK_KING)) {
+                        isCorrect = false;
+                        return moves;
+                    }
                 }
             }
         }
@@ -214,18 +218,18 @@ public class Chess extends Game {
                 deskMoves[i][j] = new ArrayList<>(moves[i][j].size());
                 for (Move m : moves[i][j]) {
                     desk.executeMove(m);
-                    Point[] points;
+                    List<Move>[][] generatedMoves = null;
                     if (m instanceof Castling) {
                         int sC = Math.min(m.startColumn, m.endColumn);
                         int eC = Math.max(m.startColumn, m.endColumn);
-                        points = new Point[eC - sC + 1];
+                        Point[] points = new Point[eC - sC + 1];
                         for (int k = sC; k <= eC; k++) {
                             points[k - sC] = new Point(m.startRow, k);
+                        generatedMoves = checkNonTarget(points);
                         }
                     } else {
-                        points = new Point[]{desk.turn ? whiteKing : blackKing};
+                        generatedMoves = checkNonTarget();
                     }
-                    List<Move>[][] generatedMoves = checkNonTarget(points);
                     if (isCorrect) {
                         deskMoves[i][j].add(new MoveTree(m, generatedMoves));
                         hasMoves = true;

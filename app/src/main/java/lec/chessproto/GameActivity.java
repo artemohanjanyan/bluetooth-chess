@@ -43,12 +43,12 @@ public abstract class GameActivity extends AppCompatActivity  implements Chess.L
         super.onCreate(savedInstanceState);
 
         initialIntent = getIntent();
-        int gameid = initialIntent.getIntExtra(GAME, CHESS_CLS);
+        int gameId = initialIntent.getIntExtra(GAME, CHESS_CLS);
         setContentView(R.layout.activity_chess_view);
         gameView = (GameView) findViewById(R.id.chess);
         gameOverText = (TextView) findViewById(R.id.game_over_text);
 
-        switch (gameid) {
+        switch (gameId) {
             case CHESS_CLS : f = Desk.getClassicStartPosition(); break;
             case CHESS_960: f = Desk.getRandomFisherStartPosition(); break;
             default: throw new RuntimeException("this game doesn't supported");
