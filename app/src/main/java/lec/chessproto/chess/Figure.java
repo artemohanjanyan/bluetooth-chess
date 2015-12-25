@@ -2,20 +2,25 @@ package lec.chessproto.chess;
 
 
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public  class Figure {
 
+    public static ArrayList<Figure> figures = new ArrayList<>();
+
     public final boolean color;
     private MoveFinder m;
     public final int ID;
 
-    public Figure(boolean color, int ID, MoveFinder m) {
+    public Figure(boolean color, MoveFinder m) {
         this.color = color;
         this.m = m;
         m.figure = this;
-        this.ID = ID;
+        this.ID = figures.size();
+        figures.add(this);
     }
 
     public List<Move> getMoves(Desk desk, int row, int column) {
@@ -137,27 +142,90 @@ public  class Figure {
         }
     }
 
+    static class KingMoveFinder extends FieldCheckMoveFinder {
+
+        Figure king, rook;
+
+        public KingMoveFinder() {
+            super(KING_DROW, KING_DCOLUMN);
+        }
+
+        private Move checkCastling(Desk desk, int row, int column, int dcolumn) {
+            int startKingColumn = column, startRookColumn = -1;
+            boolean rookFind = false;
+
+            for(column += dcolumn; column < 8 && column >= 0; column += dcolumn) {
+                Figure f = desk.d[row][column];
+                if (f != null) {
+                    if (f == rook) {
+                        rookFind = true;
+                        startRookColumn = column;
+                        break;
+                    } else {
+                        return null;
+                    }
+                }
+            }
+            for(column += dcolumn; column <= 6 && column >=2; column += dcolumn) {
+                Figure f = desk.d[row][column];
+                if (f != null) {
+                    return null;
+                }
+            }
+            return rookFind ? new Castling(king.getColor(), startKingColumn, startRookColumn) : null;
+        }
+
+        @Override
+        List<Move> getMoves(Desk desk, int row, int column) {
+            Chess chess = (Chess)desk.game;
+            List<Move> ret = super.getMoves(desk, row, column);
+            king = desk.d[row][column];
+            rook = king.color ? BLACK_ROOK : WHITE_ROOK;
+            if (king == BLACK_KING && row == 7) {
+                if (chess.isBlackLongCastlingEnabled) {
+                    Move longCastling = checkCastling(desk, row, column, -1);
+                    if (longCastling != null) ret.add(longCastling);
+
+                }
+                if (chess.isBlackShortCastlingEnabled) {
+                    Move shortCastling = checkCastling(desk, row, column, 1);
+                    if (shortCastling != null) ret.add(shortCastling);
+                }
+            } else if (king == WHITE_KING && row == 0) {
+                if (chess.isWhiteLongCastlingEnabled) {
+                    Move longCastling = checkCastling(desk, row, column, -1);
+                    if (longCastling != null) ret.add(longCastling);
+                }
+                if (chess.isWhiteShortCastlingEnabled) {
+                    Move shortCastling = checkCastling(desk, row, column, 1);
+                    if (shortCastling != null) ret.add(shortCastling);
+                }
+            }
+            return ret;
+        }
+    }
+
     static final int[] KNIGHT_DROW    = new int[] {2, 1, -2, -1, 2, 1, -2, -1};
     static final int[] KNIGHT_DCOLUMN = new int[] {1, 2, 1, 2, -1, -2, -1, -2};
 
     static final int[] KING_DROW    = new int[] {1, 0, -1, 0, 1, -1, 1, -1};
     static final int[] KING_DCOLUMN = new int[] {0, 1, 0, -1, 1, 1, -1, -1};
 
-    public static final Figure WHITE_PAWN = new Figure(Chess.WHITE, 0, new PawnMoveFinder( 1, 1));
-    public static final Figure BLACK_PAWN = new Figure(Chess.BLACK, 1, new PawnMoveFinder(-1, 6));
+    public static final Figure WHITE_PAWN = new Figure(Chess.WHITE, new PawnMoveFinder( 1, 1));
+    public static final Figure BLACK_PAWN = new Figure(Chess.BLACK,  new PawnMoveFinder(-1, 6));
 
-    public static final Figure WHITE_ROOK = new Figure(Chess.WHITE, 2, new DirectMoveFinder(true, false));
-    public static final Figure BLACK_ROOK = new Figure(Chess.BLACK, 3, new DirectMoveFinder(true, false));
+    public static final Figure WHITE_ROOK = new Figure(Chess.WHITE, new DirectMoveFinder(true, false));
+    public static final Figure BLACK_ROOK = new Figure(Chess.BLACK, new DirectMoveFinder(true, false));
 
-    public static final Figure WHITE_BISHOP = new Figure(Chess.WHITE, 4, new DirectMoveFinder(false, true));
-    public static final Figure BLACK_BISHOP = new Figure(Chess.BLACK, 5, new DirectMoveFinder(false, true));
+    public static final Figure WHITE_BISHOP = new Figure(Chess.WHITE, new DirectMoveFinder(false, true));
+    public static final Figure BLACK_BISHOP = new Figure(Chess.BLACK, new DirectMoveFinder(false, true));
 
-    public static final Figure WHITE_KNIGHT = new Figure(Chess.WHITE, 6, new FieldCheckMoveFinder(KNIGHT_DROW, KNIGHT_DCOLUMN));
-    public static final Figure BLACK_KNIGHT = new Figure(Chess.BLACK, 7, new FieldCheckMoveFinder(KNIGHT_DROW, KNIGHT_DCOLUMN));
+    public static final Figure WHITE_KNIGHT = new Figure(Chess.WHITE, new FieldCheckMoveFinder(KNIGHT_DROW, KNIGHT_DCOLUMN));
+    public static final Figure BLACK_KNIGHT = new Figure(Chess.BLACK, new FieldCheckMoveFinder(KNIGHT_DROW, KNIGHT_DCOLUMN));
 
-    public static final Figure WHITE_QUEEN = new Figure(Chess.WHITE, 8, new DirectMoveFinder(true, true));
-    public static final Figure BLACK_QUEEN = new Figure(Chess.BLACK, 9, new DirectMoveFinder(true, true));
+    public static final Figure WHITE_QUEEN = new Figure(Chess.WHITE, new DirectMoveFinder(true, true));
+    public static final Figure BLACK_QUEEN = new Figure(Chess.BLACK, new DirectMoveFinder(true, true));
 
-    public static final Figure WHITE_KING = new Figure(Chess.WHITE, 10, new FieldCheckMoveFinder(KING_DROW, KING_DCOLUMN));
-    public static final Figure BLACK_KING = new Figure(Chess.BLACK, 11, new FieldCheckMoveFinder(KING_DROW, KING_DCOLUMN));
+    public static final Figure WHITE_KING = new Figure(Chess.WHITE, new KingMoveFinder());
+    public static final Figure BLACK_KING = new Figure(Chess.BLACK, new KingMoveFinder());
 }

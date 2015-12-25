@@ -112,6 +112,8 @@ public class TmpActivity extends AppCompatActivity {
                 // TODO start game
                 //startActivityForResult(new Intent(TmpActivity.this, ???),
                 //      REQUEST_PLAY);
+                Intent intent = new Intent(TmpActivity.this, BtGameActivity.class);
+                startActivityForResult(intent, REQUEST_PLAY);
                 finish();
                 break;
 

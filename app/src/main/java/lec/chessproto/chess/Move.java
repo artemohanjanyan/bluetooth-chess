@@ -1,10 +1,17 @@
 package lec.chessproto.chess;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
 public abstract class Move {
+
+    protected static ArrayList<MoveFactory> factoryMap = new ArrayList<>();
+    protected interface MoveFactory {
+        Move create(byte... bytes);
+    }
+
 
     public final int startRow, startColumn, endRow, endColumn;
     public final boolean terminal;
@@ -44,4 +51,25 @@ public abstract class Move {
         return  this.startRow == other.startRow && this.startColumn == other.startColumn &&
                 this.endRow == other.endRow && this.endColumn == other.endColumn;
     }
+
+    public boolean equals(int sRow, int sColumn, int eRow, int eColumn) {
+        return startColumn == sColumn && startRow == sRow && endColumn == eColumn && endRow == eRow;
+    }
+
+    public abstract byte[] toBytes();
+
+    public static byte fieldToByte(int row, int column) {
+        return (byte)((row << 3) | column);
+    }
+
+    public static Point byteToField(byte b) {
+        return new Point((b >> 3) & 0b111, b & 0b111);
+    }
+
+
+
+    public static Move getMove(int bytes, byte[] buffer) {
+        return factoryMap.get(buffer[0]).create(Arrays.copyOfRange(buffer, 1, bytes));
+    }
+
 }

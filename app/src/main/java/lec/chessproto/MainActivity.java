@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
             btService.registerActivity(MainActivity.class, getString(R.string.chat_name));
 
-            btService.setOnMessageReceived(new BluetoothService.OnMessageReceived() {
+            btService.setOnMessageReceivedListener(new BluetoothService.OnMessageReceivedListener() {
                 @Override
                 public void process(int bytes, byte[] buffer) {
                     handler.obtainMessage(HANDLER_MESSAGE_GET, bytes, -1, buffer)
