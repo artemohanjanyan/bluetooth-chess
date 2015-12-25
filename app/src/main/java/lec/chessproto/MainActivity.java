@@ -31,8 +31,6 @@ public class MainActivity extends AppCompatActivity {
 
     private BluetoothService btService;
 
-    boolean shouldLaunch = true;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         if (btService != null) {
-            btService.hideNotification();
+            btService.registerActivity(MainActivity.class, getString(R.string.chat_name));
         }
     }
 
@@ -62,12 +60,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-//        if (btService != null && shouldLaunch) {
-//            btService.showNotification(MainActivity.class, getString(R.string.app_name));
-//        }
-
         if (btService != null) {
-            btService.showNotification(MainActivity.class, getString(R.string.chat_name));
+            btService.unregisterActivity();
         }
     }
 
@@ -109,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();
 
-            btService.hideNotification();
+            btService.registerActivity(MainActivity.class, getString(R.string.chat_name));
 
             btService.setOnMessageReceived(new BluetoothService.OnMessageReceived() {
                 @Override
@@ -150,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
 
         switch (requestCode) {
             case REQUEST_CONNECT:
-                shouldLaunch = true;
                 switch (resultCode) {
                     case RESULT_CANCELED:
                         finish();

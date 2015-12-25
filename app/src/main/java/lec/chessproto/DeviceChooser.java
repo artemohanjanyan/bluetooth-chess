@@ -58,11 +58,11 @@ public class DeviceChooser extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
 
         if (btService != null) {
-            btService.hideNotification();
+            btService.registerActivity(DeviceChooser.class, getString(R.string.chat_name));
         }
     }
 
@@ -71,7 +71,7 @@ public class DeviceChooser extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();
 
-            btService.hideNotification();
+            btService.registerActivity(DeviceChooser.class, getString(R.string.chat_name));
 
             btService.setOnConnected(new BluetoothService.OnConnected() {
                 @Override
@@ -171,7 +171,7 @@ public class DeviceChooser extends AppCompatActivity {
     @Override
     protected void onStop() {
         if (btService != null) {
-            btService.showNotification(DeviceChooser.class, getString(R.string.chat_name));
+            btService.unregisterActivity();
         }
 
         super.onStop();
