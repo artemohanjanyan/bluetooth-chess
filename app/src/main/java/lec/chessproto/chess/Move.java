@@ -52,6 +52,10 @@ public abstract class Move {
                 this.endRow == other.endRow && this.endColumn == other.endColumn;
     }
 
+    public boolean equals(int sRow, int sColumn, int eRow, int eColumn) {
+        return startColumn == sColumn && startRow == sRow && endColumn == eColumn && endRow == eRow;
+    }
+
     public abstract byte[] toBytes();
 
     public static byte fieldToByte(int row, int column) {

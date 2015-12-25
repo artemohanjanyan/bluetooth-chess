@@ -1,6 +1,8 @@
 package lec.chessproto.chess;
 
 
+import java.util.List;
+
 public class Castling  extends Move {
 
     static byte MOVE_ID;
@@ -45,4 +47,11 @@ public class Castling  extends Move {
         return new byte[] {MOVE_ID, (byte)(Move.fieldToByte(startColumn, startRookColumn) + (color ? 1 << 6 : 0))};
     }
 
+    @Override
+    public List<Point> getChangedFields() {
+        List<Point> ret = super.getChangedFields();
+        ret.add(new Point(startRow, startRookColumn));
+        ret.add(new Point(endRow, endColumn + (startColumn > startRookColumn ? 1 : -1)));
+        return ret;
+    }
 }

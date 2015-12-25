@@ -11,15 +11,59 @@ public class Chess extends Game {
 
     private List<MoveTree>[][] deskMoves;
 
+    boolean isBlackLongCastlingEnabled ,
+            isBlackShortCastlingEnabled,
+            isWhiteLongCastlingEnabled ,
+            isWhiteShortCastlingEnabled;
+    int lwrColumn = -1, rwrColumn = -1, lbrColumn = -1, rbrColumn = -1;
+    Point blackKing, whiteKing;
+
     @SuppressWarnings("unchecked")
     public Chess(Figure[][] d, boolean turn, Player whitePlayer, Player blackPlayer) {
         super(d, turn, whitePlayer, blackPlayer);
 
+
+
+        for (int i = 0; i < Desk.SIZE; i++) {
+            for (int j = 0; j < Desk.SIZE; j++) {
+                if (desk.d[i][j] == Figure.WHITE_KING) whiteKing = new Point(i, j);
+                if (desk.d[i][j] == Figure.BLACK_KING) blackKing = new Point(i, j);
+            }
+        }
+        if (whiteKing == null || blackKing == null)
+            throw new RuntimeException("Not enough kings on the board");
+        if (whiteKing.row == 0) {
+            for (int i = 0; i < whiteKing.column; i++) {
+                if (desk.d[0][i] == Figure.WHITE_ROOK) {
+                    lwrColumn = i;
+                    isWhiteLongCastlingEnabled = true;
+                }
+            }
+            for (int i = whiteKing.column + 1; i < Desk.SIZE; i++) {
+                if (desk.d[0][i] == Figure.WHITE_ROOK) {
+                    rwrColumn = i;
+                    isWhiteShortCastlingEnabled = true;
+                }
+            }
+        }
+        if (blackKing.row == 7) {
+            for (int i = 0; i < blackKing.column; i++) {
+                if (desk.d[7][i] == Figure.BLACK_ROOK) {
+                    lbrColumn = i;
+                    isBlackLongCastlingEnabled = true;
+                }
+            }
+            for (int i = blackKing.column + 1; i < Desk.SIZE; i++) {
+                if (desk.d[7][i] == Figure.BLACK_ROOK) {
+                    rbrColumn = i;
+                    isBlackShortCastlingEnabled = true;
+                }
+            }
+        }
+
         List<Move>[][] firstMoves = genMoves();
         deskMoves = new List[Desk.SIZE][Desk.SIZE];
         genDeskMoves(firstMoves);
-
-
     }
 
     private static class MoveTree {
@@ -70,7 +114,8 @@ public class Chess extends Game {
         return moves;
     }
 
-    synchronized boolean  moveFigure(Player player, Move move) {
+
+    boolean  moveFigure(Player player, Move move) {
         if (deskMoves[move.startRow][move.startColumn] == null) {
             return false;
         }
@@ -80,6 +125,32 @@ public class Chess extends Game {
                 || index == -1) {
             return false;
         }
+        move = deskMoves[move.startRow][move.startColumn].get(index).move;
+        Point king =(desk.turn ? blackKing : whiteKing);
+        if (king.equals(move.startRow, move.startColumn)) {
+            king.set(move.endRow, move.endColumn);
+            if (desk.turn) {
+                isBlackLongCastlingEnabled = false;
+                isBlackShortCastlingEnabled = false;
+            } else {
+                isWhiteLongCastlingEnabled = false;
+                isWhiteShortCastlingEnabled = false;
+            }
+        }
+        int aRow = desk.turn ? move.endRow : move.startRow;
+        int aColumn = desk.turn ? move.endColumn : move.startColumn;
+        int bRow = desk.turn ? move.startRow : move.endRow;
+        int bColumn = desk.turn ? move.startColumn : move.endColumn;
+        if (Point.equals(0, lwrColumn, aRow, aColumn))
+            isWhiteLongCastlingEnabled = false;
+        if (Point.equals(0, rwrColumn, aRow, aColumn))
+            isWhiteShortCastlingEnabled = false;
+        if (Point.equals(7, lbrColumn, bRow, bColumn))
+            isBlackLongCastlingEnabled = false;
+        if (Point.equals(7, rbrColumn, bRow, bColumn))
+            isBlackShortCastlingEnabled = false;
+
+
         desk.executeMove(move);
         List<Move>[][] nextMoves = deskMoves[move.startRow][move.startColumn].get(index).nextMoves;
         boolean isMate = !genDeskMoves(nextMoves);
@@ -110,8 +181,7 @@ public class Chess extends Game {
 
     private boolean isCorrect;
 
-    private List<Move>[][] checkCorrect() {
-        Figure king = desk.turn ? Figure.WHITE_KING : Figure.BLACK_KING;
+    private List<Move>[][] checkNonTarget(Point... pointToCheck) {
         List<Move>[][] moves = genMoves();
 
         for (int i = 0; i < Desk.SIZE; i++) {
@@ -119,10 +189,12 @@ public class Chess extends Game {
                 if (moves[i][j] == null) {
                     continue;
                 }
-                for (Move pmove : moves[i][j]) {
-                    if (desk.d[pmove.endRow][pmove.endColumn] == king) {
-                        isCorrect =  false;
-                        return moves;
+                for (Move m : moves[i][j]) {
+                    for (Point p : pointToCheck) {
+                        if (p.equals(m.endRow, m.endColumn)) {
+                            isCorrect =  false;
+                            return moves;
+                        }
                     }
                 }
             }
@@ -142,7 +214,18 @@ public class Chess extends Game {
                 deskMoves[i][j] = new ArrayList<>(moves[i][j].size());
                 for (Move m : moves[i][j]) {
                     desk.executeMove(m);
-                    List<Move>[][] generatedMoves = checkCorrect();
+                    Point[] points;
+                    if (m instanceof Castling) {
+                        int sC = Math.min(m.startColumn, m.endColumn);
+                        int eC = Math.max(m.startColumn, m.endColumn);
+                        points = new Point[eC - sC + 1];
+                        for (int k = sC; k <= eC; k++) {
+                            points[k - sC] = new Point(m.startRow, k);
+                        }
+                    } else {
+                        points = new Point[]{desk.turn ? whiteKing : blackKing};
+                    }
+                    List<Move>[][] generatedMoves = checkNonTarget(points);
                     if (isCorrect) {
                         deskMoves[i][j].add(new MoveTree(m, generatedMoves));
                         hasMoves = true;
