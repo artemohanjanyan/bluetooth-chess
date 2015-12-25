@@ -1,10 +1,17 @@
 package lec.chessproto.chess;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
 public abstract class Move {
+
+    protected static ArrayList<MoveFactory> factoryMap = new ArrayList<>();
+    protected interface MoveFactory {
+        Move create(byte... bytes);
+    }
+
 
     public final int startRow, startColumn, endRow, endColumn;
     public final boolean terminal;
@@ -56,13 +63,9 @@ public abstract class Move {
     }
 
 
-    public static Move getMove(int bytes, byte[] buffer) {
-        if (bytes < 3)
-            throw new RuntimeException("illegal move inner params");
 
-        Point s = byteToField(buffer[1]);
-        Point f = byteToField(buffer[2]);
-        return new SimpleMove(s.row, s.column, f.row, f.column);
+    public static Move getMove(int bytes, byte[] buffer) {
+        return factoryMap.get(buffer[0]).create(Arrays.copyOfRange(buffer, 1, bytes));
     }
 
 }

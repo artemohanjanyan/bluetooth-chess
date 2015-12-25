@@ -3,7 +3,19 @@ package lec.chessproto.chess;
 
 public class SimpleMove extends Move {
 
-    public static final byte MOVE_ID = 1;
+    static final byte MOVE_ID;
+    static private MoveFactory f = new MoveFactory() {
+        @Override
+        public Move create(byte... bytes) {
+            Point s = byteToField(bytes[0]);
+            Point f = byteToField(bytes[1]);
+            return new SimpleMove(s.row, s.column, f.row, f.column);
+        }
+    };
+    static {
+        MOVE_ID = (byte) factoryMap.size();
+        factoryMap.add(f);
+    }
 
     public SimpleMove(int startRow, int startColumn, int endRow, int endColumn) {
         super(startRow, startColumn, endRow, endColumn);
