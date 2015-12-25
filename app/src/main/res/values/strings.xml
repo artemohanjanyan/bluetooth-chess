@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Chess Proto</string>
 
+    <string name="menu_name">Menu</string>
+
     <string name="chat_name">Chat</string>
 
     <string name="bluetooth_absent">Device is not supported</string>
@@ -17,5 +19,5 @@
 
     <!-- Menu -->
     <string name="local_game">Local game</string>
-    <string name="bt_game">BT game</string>
+    <string name="bt_game">Bluetooth game</string>
 </resources>
