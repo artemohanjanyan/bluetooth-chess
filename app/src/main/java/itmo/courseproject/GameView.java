@@ -156,20 +156,33 @@ public class GameView extends View {
 
         dstRect.set(0, 0, fieldSize, fieldSize);
 
-
-        for (int i = Desk.SIZE - 1; i >= 0; i--) {
-            for (int j = 0; j < Desk.SIZE; j++) {
-                Figure figure = desk.getFigure(i, j);
-                if (figure != null && !(dragged && i == sRow && j == sColumn)) {
-                    Bitmap bitmap = figureBitmapMap[figure.getID()];
-                    canvas.drawBitmap(bitmap, srcRect, dstRect, figurePaint);
+        if (localPlayer.getColor()) {
+            for (int i = 0; i < Desk.SIZE; i++) {
+                for (int j = Desk.SIZE - 1; j >= 0; j--) {
+                    drawFigure(canvas, i, j);
+                    dstRect.offset(fieldSize, 0);
                 }
-                dstRect.offset(fieldSize, 0);
+                dstRect.offset(-boardSize, fieldSize);
             }
-            dstRect.offset(-boardSize, fieldSize);
+        } else {
+            for (int i = Desk.SIZE - 1; i >= 0; i--) {
+                for (int j = 0; j < Desk.SIZE; j++) {
+                    drawFigure(canvas, i, j);
+                    dstRect.offset(fieldSize, 0);
+                }
+                dstRect.offset(-boardSize, fieldSize);
+            }
         }
         if (dragged) {
             canvas.drawBitmap(figureBitmapMap[desk.getFigure(sRow, sColumn).getID()], srcRect, drgRect, figurePaint);
+        }
+    }
+
+    private void drawFigure(Canvas canvas, int i, int j) {
+        Figure figure = desk.getFigure(i, j);
+        if (figure != null && !(dragged && i == sRow && j == sColumn)) {
+            Bitmap bitmap = figureBitmapMap[figure.getID()];
+            canvas.drawBitmap(bitmap, srcRect, dstRect, figurePaint);
         }
     }
 
@@ -182,6 +195,10 @@ public class GameView extends View {
     }
 
     private void drawField(Canvas canvas, int row, int column, Paint paint) {
+        if (localPlayer.getColor()) {
+            row = Desk.SIZE - row - 1;
+            column = Desk.SIZE - column - 1;
+        }
         canvas.drawRect(
                 fieldSize * column,
                 fieldSize * (Desk.SIZE - row - 1),
@@ -209,8 +226,8 @@ public class GameView extends View {
         if (x < 0 || y < 0 || x >= boardSize || y >= boardSize)
             return super.onTouchEvent(event);
 
-        int column = x / fieldSize;
-        int row = Desk.SIZE - y / fieldSize - 1;
+        int column = localPlayer.getColor() ? Desk.SIZE - x / fieldSize - 1 : x / fieldSize;
+        int row = localPlayer.getColor() ?  y / fieldSize : Desk.SIZE - y / fieldSize - 1;
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -245,7 +262,7 @@ public class GameView extends View {
     }
 
     private void trySelect(int row, int column) {
-        if (desk.getFigure(row, column) != null && localPlayer != null) {
+        if (desk.getFigure(row, column) != null) {
             markerMoves = localPlayer.chooseFigure(row, column);
             selected = true;
             sRow = row;
@@ -273,5 +290,4 @@ public class GameView extends View {
         dragX = x;
         dragY = y;
     }
-
 }

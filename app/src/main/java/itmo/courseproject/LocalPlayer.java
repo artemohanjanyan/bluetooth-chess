@@ -14,6 +14,7 @@ public class LocalPlayer extends Player {
 
     public LocalPlayer(GameView gameView) {
         this.gameView = gameView;
+        this.gameView.localPlayer = this;
     }
 
     @Override

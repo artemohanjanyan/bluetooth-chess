@@ -12,10 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name="itmo.courseproject.LocalGameActivity"/>
+        <activity android:name=".LocalGameActivity"/>
 
         <activity
-            android:name="itmo.courseproject.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/chat_name"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
@@ -26,13 +26,13 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="itmo.courseproject.DeviceChooser" />
+        <activity android:name=".DeviceChooser" />
 
-        <service android:name="itmo.courseproject.BluetoothService" />
+        <service android:name=".BluetoothService" />
 
-        <activity android:name="itmo.courseproject.BtGameActivity"/>
+        <activity android:name=".BtGameActivity"/>
 
-        <activity android:name="itmo.courseproject.MenuActivity"
+        <activity android:name=".MenuActivity"
             android:label="@string/menu_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,7 +42,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="itmo.courseproject.TmpActivity"/>
+        <activity android:name=".TmpActivity"/>
     </application>
 
 </manifest>
