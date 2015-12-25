@@ -1,4 +1,4 @@
-package lec.chessproto.chess;
+package itmo.courseproject.chess;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,7 +7,8 @@ import java.util.List;
 
 public abstract class Move {
 
-    protected static ArrayList<MoveFactory> factoryMap = new ArrayList<>();
+    protected static final ArrayList<MoveFactory> factoryMap = new ArrayList<>();
+
     protected interface MoveFactory {
         Move create(byte... bytes);
     }
@@ -16,7 +17,7 @@ public abstract class Move {
     public final int startRow, startColumn, endRow, endColumn;
     public final boolean terminal;
 
-    public Move(int startRow, int startColumn, int endRow, int endColumn, boolean terminal) {
+    protected Move(int startRow, int startColumn, int endRow, int endColumn, boolean terminal) {
         this.startRow = startRow;
         this.startColumn = startColumn;
         this.endRow = endRow;
@@ -24,7 +25,7 @@ public abstract class Move {
         this.terminal = terminal;
     }
 
-    public Move(int startRow, int startColumn, int endRow, int endColumn) {
+    protected Move(int startRow, int startColumn, int endRow, int endColumn) {
         this(startRow, startColumn, endRow, endColumn, true);
     }
 
@@ -38,7 +39,7 @@ public abstract class Move {
         return ret;
     }
 
-    //should be override if move isn't terminal
+    //should be overridden if move isn't terminal
     public List<Move> getPossibleFollowingMoves() {
         return null;
     }
@@ -48,7 +49,7 @@ public abstract class Move {
         if (!(o instanceof Move)) return false;
 
         Move other = (Move) o;
-        return  this.startRow == other.startRow && this.startColumn == other.startColumn &&
+        return this.startRow == other.startRow && this.startColumn == other.startColumn &&
                 this.endRow == other.endRow && this.endColumn == other.endColumn;
     }
 
@@ -59,13 +60,12 @@ public abstract class Move {
     public abstract byte[] toBytes();
 
     public static byte fieldToByte(int row, int column) {
-        return (byte)((row << 3) | column);
+        return (byte) ((row << 3) | column);
     }
 
     public static Point byteToField(byte b) {
         return new Point((b >> 3) & 0b111, b & 0b111);
     }
-
 
 
     public static Move getMove(int bytes, byte[] buffer) {

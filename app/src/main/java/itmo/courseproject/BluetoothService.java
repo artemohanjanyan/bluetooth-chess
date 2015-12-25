@@ -1,4 +1,4 @@
-package lec.chessproto;
+package itmo.courseproject;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -23,10 +23,10 @@ import java.util.UUID;
  */
 public class BluetoothService extends Service {
 
-    public static final String TAG = "BluetoothService";
+    private static final String TAG = "BluetoothService";
     private static final UUID MY_UUID = UUID.fromString("27e86a38-a29c-421e-9d17-fe9c0c3bf2e6");
 
-    public static final int NOTIFICATION_ID = 1;
+    private static final int NOTIFICATION_ID = 1;
 
     private BluetoothAdapter btAdapter;
     private BluetoothSocket btSocket;
@@ -34,16 +34,6 @@ public class BluetoothService extends Service {
     private AcceptThread acceptThread;
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
-    }
 
     @Override
     public void onDestroy() {
@@ -67,7 +57,8 @@ public class BluetoothService extends Service {
         if (btSocket != null) {
             try {
                 btSocket.close();
-            } catch (IOException ignored) { }
+            } catch (IOException ignored) {
+            }
             btSocket = null;
         }
     }
@@ -77,11 +68,13 @@ public class BluetoothService extends Service {
     public IBinder onBind(Intent intent) {
         return binder;
     }
+
     public class BtBinder extends Binder {
         BluetoothService getService() {
             return BluetoothService.this;
         }
     }
+
     private final IBinder binder = new BtBinder();
 
     public static class BtUnavailableException extends Exception {
@@ -108,7 +101,9 @@ public class BluetoothService extends Service {
     public interface OnConnected {
         void success();
     }
+
     private OnConnected onConnected;
+
     public void setOnConnected(OnConnected onConnected) {
         this.onConnected = onConnected;
     }
@@ -126,9 +121,11 @@ public class BluetoothService extends Service {
     public interface OnMessageReceivedListener {
         void process(int bytes, byte[] buffer);
     }
+
     private OnMessageReceivedListener onMessageReceivedListener;
-    ArrayList<Integer> sizes = new ArrayList<>();
-    ArrayList<byte[]> cache = new ArrayList<>();
+    private final ArrayList<Integer> sizes = new ArrayList<>();
+    private final ArrayList<byte[]> cache = new ArrayList<>();
+
     public void setOnMessageReceivedListener(OnMessageReceivedListener onMessageReceivedListener) {
         this.onMessageReceivedListener = onMessageReceivedListener;
 
@@ -166,6 +163,7 @@ public class BluetoothService extends Service {
     private int regCount = 0;
     private Class<?> lastClass;
     private String lastString;
+
     private synchronized void changeRegCount(int d) {
         int newRegCount = regCount + d;
 
@@ -233,7 +231,8 @@ public class BluetoothService extends Service {
         public AcceptThread() {
             try {
                 serverSocket = btAdapter.listenUsingRfcommWithServiceRecord(TAG, MY_UUID);
-            } catch (IOException ignored) { }
+            } catch (IOException ignored) {
+            }
         }
 
         public void run() {
@@ -248,7 +247,8 @@ public class BluetoothService extends Service {
                     connected(socket, true);
                     try {
                         serverSocket.close();
-                    } catch (IOException ignored) { }
+                    } catch (IOException ignored) {
+                    }
                     break;
                 }
             }
@@ -257,7 +257,8 @@ public class BluetoothService extends Service {
         public void cancel() {
             try {
                 serverSocket.close();
-            } catch (IOException ignored) { }
+            } catch (IOException ignored) {
+            }
         }
     }
 
@@ -268,7 +269,8 @@ public class BluetoothService extends Service {
         public ConnectThread(String address) {
             try {
                 socket = btAdapter.getRemoteDevice(address).createRfcommSocketToServiceRecord(MY_UUID);
-            } catch (IOException ignored) { }
+            } catch (IOException ignored) {
+            }
         }
 
         public void run() {
@@ -280,7 +282,8 @@ public class BluetoothService extends Service {
             } catch (IOException connectException) {
                 try {
                     socket.close();
-                } catch (IOException ignored) { }
+                } catch (IOException ignored) {
+                }
                 return;
             }
 
@@ -293,7 +296,8 @@ public class BluetoothService extends Service {
             if (socket != null) {
                 try {
                     socket.close();
-                } catch (IOException ignored) { }
+                } catch (IOException ignored) {
+                }
             }
         }
     }
@@ -341,13 +345,15 @@ public class BluetoothService extends Service {
             try {
                 outputStream.write(bytes);
                 Log.d(TAG, "write");
-            } catch (IOException ignored) { }
+            } catch (IOException ignored) {
+            }
         }
 
         public void cancel() {
             try {
                 btSocket.close();
-            } catch (IOException ignored) { }
+            } catch (IOException ignored) {
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-package lec.chessproto.chess;
+package itmo.courseproject.chess;
 
 
 import java.util.List;
@@ -7,11 +7,12 @@ public abstract class Game {
     public static final boolean WHITE = false;
     public static final boolean BLACK = true;
 
-    Player whitePlayer, blackPlayer;
+    final Player whitePlayer;
+    final Player blackPlayer;
 
-    Desk desk;
+    final Desk desk;
 
-    public Game(Figure[][] d, boolean turn, Player whitePlayer, Player blackPlayer) {
+    Game(Figure[][] d, boolean turn, Player whitePlayer, Player blackPlayer) {
 
         this.whitePlayer = whitePlayer;
         this.blackPlayer = blackPlayer;
@@ -29,11 +30,13 @@ public abstract class Game {
 
     public interface Listener {
         void onFigureChosen(List<Move> moves);
+
         void onMoveExecuted(Move move);
+
         void onGameOver(boolean winner);
     }
 
-    protected Listener listener;
+    Listener listener;
 
     public Listener getListener() {
         return listener;
@@ -45,7 +48,7 @@ public abstract class Game {
 
     abstract List<Move> chooseFigure(Player player, int row, int column);
 
-    synchronized boolean  moveFigure(Player player, Move move) {
+    synchronized boolean moveFigure(Player player, Move move) {
         if (player != whitePlayer && player != blackPlayer && desk.turn ^ player.color) {
             return false;
         }
@@ -54,7 +57,7 @@ public abstract class Game {
         return true;
     }
 
-    protected synchronized void onMoveExecution(Player player, Move move) {
+    synchronized void onMoveExecution(Player player, Move move) {
         if (move.terminal) {
             ((player == whitePlayer) ? blackPlayer : whitePlayer).onYourTurn();
         }
@@ -71,11 +74,11 @@ public abstract class Game {
         return desk;
     }
 
-    protected void gameOver(boolean _winner) {
+    void gameOver(boolean _winner) {
         Player winner = (_winner) ? blackPlayer : whitePlayer;
-        Player loser  = (_winner) ? whitePlayer : blackPlayer;
+        Player loser = (_winner) ? whitePlayer : blackPlayer;
         winner.gameOver(true);
-        loser.gameOver(true);
+        loser.gameOver(false);
         if (listener != null) {
             listener.onGameOver(_winner);
         }

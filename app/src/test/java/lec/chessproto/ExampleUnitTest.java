@@ -1,4 +1,4 @@
-package lec.chessproto;
+package itmo.courseproject;
 
 import org.junit.Test;
 

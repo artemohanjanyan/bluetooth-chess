@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Chess Proto</string>
+    <string name="app_name">Chess</string>
 
     <string name="menu_name">Menu</string>
 
@@ -11,7 +11,7 @@
 
     <!-- Device chooser -->
     <string name="scan_for_devices">Scan for devices</string>
-    <string name="scanning_for_devices">Scanning...</string>
+    <string name="scanning_for_devices">Scanning…</string>
     <string name="n_devices_found_suffix">devices found</string>
     <string name="enable_discoverable">Make discoverable</string>
 

@@ -1,21 +1,21 @@
-package lec.chessproto;
+package itmo.courseproject;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
 import java.util.List;
 
-import lec.chessproto.chess.Chess;
-import lec.chessproto.chess.Desk;
-import lec.chessproto.chess.Figure;
-import lec.chessproto.chess.Game;
-import lec.chessproto.chess.Move;
-import lec.chessproto.chess.Player;
+import itmo.courseproject.chess.Chess;
+import itmo.courseproject.chess.Desk;
+import itmo.courseproject.chess.Figure;
+import itmo.courseproject.chess.Game;
+import itmo.courseproject.chess.Move;
+import itmo.courseproject.chess.Player;
 
-public abstract class GameActivity extends AppCompatActivity  implements Chess.Listener {
+public abstract class GameActivity extends AppCompatActivity implements Chess.Listener {
 
     private static final String TAG = "GameActivity";
 
@@ -27,9 +27,9 @@ public abstract class GameActivity extends AppCompatActivity  implements Chess.L
     protected Player whitePlayer;
     protected Player blackPlayer;
 
-    public static final int CHESS_CLS = 0;
-    public static final int CHESS_960 = 1;
-    public static final String GAME = "game";
+    private static final int CHESS_CLS = 0;
+    private static final int CHESS_960 = 1;
+    static final String GAME = "game";
 
     protected Intent initialIntent;
 
@@ -49,9 +49,14 @@ public abstract class GameActivity extends AppCompatActivity  implements Chess.L
         gameOverText = (TextView) findViewById(R.id.game_over_text);
 
         switch (gameId) {
-            case CHESS_CLS : f = Desk.getClassicStartPosition(); break;
-            case CHESS_960: f = Desk.getRandomFisherStartPosition(); break;
-            default: throw new RuntimeException("this game doesn't supported");
+            case CHESS_CLS:
+                f = Desk.getClassicStartPosition();
+                break;
+            case CHESS_960:
+                f = Desk.getRandomFisherStartPosition();
+                break;
+            default:
+                throw new RuntimeException("this game doesn't supported");
         }
 
         initPlayers();

@@ -1,13 +1,13 @@
-package lec.chessproto;
+package itmo.courseproject;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.widget.Toast;
 
 public class TmpActivity extends AppCompatActivity {
@@ -58,7 +58,7 @@ public class TmpActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private ServiceConnection connection = new ServiceConnection() {
+    private final ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();

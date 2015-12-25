@@ -1,10 +1,7 @@
-package lec.chessproto.chess;
+package itmo.courseproject.chess;
 
 final public class Point {
     int row, column;
-
-    public Point() {
-    }
 
     public Point(int row, int column) {
         set(row, column);
@@ -15,9 +12,9 @@ final public class Point {
         this.column = y;
     }
 
-    void offset(int drow, int dcolumn) {
-        row += drow;
-        column += dcolumn;
+    void offset(int dRow, int dColumn) {
+        row += dRow;
+        column += dColumn;
     }
 
     @Override
@@ -32,7 +29,7 @@ final public class Point {
         return this.row == row && this.column == column;
     }
 
-    static public boolean equals(int aRow, int aColumn, int bRow, int bColumn){
+    static public boolean equals(int aRow, int aColumn, int bRow, int bColumn) {
         return aRow == bRow && aColumn == bColumn;
     }
 }

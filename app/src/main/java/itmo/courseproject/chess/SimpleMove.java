@@ -1,10 +1,10 @@
-package lec.chessproto.chess;
+package itmo.courseproject.chess;
 
 
 public class SimpleMove extends Move {
 
     static final byte MOVE_ID;
-    static private MoveFactory f = new MoveFactory() {
+    static private final MoveFactory f = new MoveFactory() {
         @Override
         public Move create(byte... bytes) {
             Point s = byteToField(bytes[0]);
@@ -12,6 +12,7 @@ public class SimpleMove extends Move {
             return new SimpleMove(s.row, s.column, f.row, f.column);
         }
     };
+
     static {
         MOVE_ID = (byte) factoryMap.size();
         factoryMap.add(f);
@@ -29,9 +30,8 @@ public class SimpleMove extends Move {
     }
 
 
-
     @Override
     public byte[] toBytes() {
-        return new byte[]{MOVE_ID ,fieldToByte(startRow, startColumn), fieldToByte(endRow, endColumn)};
+        return new byte[]{MOVE_ID, fieldToByte(startRow, startColumn), fieldToByte(endRow, endColumn)};
     }
 }

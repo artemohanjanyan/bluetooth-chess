@@ -1,7 +1,4 @@
-package lec.chessproto;
-
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+package itmo.courseproject;
 
 public class LocalGameActivity extends GameActivity {
 

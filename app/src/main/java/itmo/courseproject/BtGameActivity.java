@@ -1,4 +1,4 @@
-package lec.chessproto;
+package itmo.courseproject;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -8,12 +8,12 @@ import android.os.IBinder;
 
 public class BtGameActivity extends GameActivity {
 
-    public static final String LP_COLOR = "lpcolor";
+    public static final String LOCAL_PLAYER_COLOR = "local_player_color";
 
     private boolean serverPlayerColor;
     private BluetoothService btService;
 
-    private ServiceConnection connection = new ServiceConnection() {
+    private final ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();

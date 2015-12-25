@@ -1,14 +1,14 @@
-package lec.chessproto;
+package itmo.courseproject;
 
-import lec.chessproto.chess.Move;
+import itmo.courseproject.chess.Move;
 
 public class BtLocalPlayer extends LocalPlayer {
 
-    private BluetoothService btService;
+    private final BluetoothService btService;
 
-    public BtLocalPlayer(GameView gameView, BluetoothService btServive) {
+    public BtLocalPlayer(GameView gameView, BluetoothService btService) {
         super(gameView);
-        this.btService = btServive;
+        this.btService = btService;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package lec.chessproto;
+package itmo.courseproject;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -8,9 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -66,7 +66,7 @@ public class DeviceChooser extends AppCompatActivity {
         }
     }
 
-    private ServiceConnection connection = new ServiceConnection() {
+    private final ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();
@@ -119,7 +119,7 @@ public class DeviceChooser extends AppCompatActivity {
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
 
-    private View.OnClickListener onEnableDiscoverable = new View.OnClickListener() {
+    private final View.OnClickListener onEnableDiscoverable = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             startActivityForResult(
@@ -128,7 +128,7 @@ public class DeviceChooser extends AppCompatActivity {
         }
     };
 
-    private View.OnClickListener onScanForDevices = new View.OnClickListener() {
+    private final View.OnClickListener onScanForDevices = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             arrayAdapter.clear();
@@ -139,7 +139,7 @@ public class DeviceChooser extends AppCompatActivity {
         }
     };
 
-    private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+    private final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             btService.getBluetoothAdapter().cancelDiscovery();
@@ -153,7 +153,7 @@ public class DeviceChooser extends AppCompatActivity {
         }
     };
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="lec.chessproto">
+    package="itmo.courseproject">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -12,10 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".LocalGameActivity"/>
+        <activity android:name="itmo.courseproject.LocalGameActivity"/>
 
         <activity
-            android:name=".MainActivity"
+            android:name="itmo.courseproject.MainActivity"
             android:label="@string/chat_name"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
@@ -26,13 +26,13 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".DeviceChooser" />
+        <activity android:name="itmo.courseproject.DeviceChooser" />
 
-        <service android:name=".BluetoothService" />
+        <service android:name="itmo.courseproject.BluetoothService" />
 
-        <activity android:name=".BtGameActivity"/>
+        <activity android:name="itmo.courseproject.BtGameActivity"/>
 
-        <activity android:name=".MenuActivity"
+        <activity android:name="itmo.courseproject.MenuActivity"
             android:label="@string/menu_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,7 +42,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".TmpActivity"/>
+        <activity android:name="itmo.courseproject.TmpActivity"/>
     </application>
 
 </manifest>

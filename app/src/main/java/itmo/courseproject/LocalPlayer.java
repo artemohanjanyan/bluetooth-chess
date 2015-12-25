@@ -1,19 +1,14 @@
-package lec.chessproto;
+package itmo.courseproject;
 
 import android.util.Log;
 
-import java.util.List;
-
-import lec.chessproto.chess.Game;
-import lec.chessproto.chess.SimpleMove;
-import lec.chessproto.chess.Figure;
-import lec.chessproto.chess.Move;
-import lec.chessproto.chess.Player;
+import itmo.courseproject.chess.Game;
+import itmo.courseproject.chess.Player;
 
 
-public class LocalPlayer extends Player  {
+public class LocalPlayer extends Player {
 
-    GameView gameView;
+    private final GameView gameView;
 
     private static final String TAG = "LocalPlayer";
 

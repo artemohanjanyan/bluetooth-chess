@@ -1,21 +1,19 @@
-package lec.chessproto.chess;
+package itmo.courseproject.chess;
 
 
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public  class Figure {
+public class Figure {
 
-    public static ArrayList<Figure> figures = new ArrayList<>();
+    private static final ArrayList<Figure> figures = new ArrayList<>();
 
     public final boolean color;
-    private MoveFinder m;
-    public final int ID;
+    private final MoveFinder m;
+    private final int ID;
 
-    public Figure(boolean color, MoveFinder m) {
+    private Figure(boolean color, MoveFinder m) {
         this.color = color;
         this.m = m;
         m.figure = this;
@@ -24,7 +22,7 @@ public  class Figure {
     }
 
     public List<Move> getMoves(Desk desk, int row, int column) {
-            return  m.getMoves(desk, row, column);
+        return m.getMoves(desk, row, column);
     }
 
     public boolean getColor() {
@@ -42,75 +40,77 @@ public  class Figure {
 
     }
 
-    public static boolean isFieldCordsCorrect(int row, int column) {
+    private static boolean isFieldCordsCorrect(int row, int column) {
         return row >= 0 && column >= 0 && row < Desk.SIZE && column < Desk.SIZE;
     }
 
-    static class DirectMoveFinder extends  MoveFinder {
+    static class DirectMoveFinder extends MoveFinder {
 
-        boolean line, diag;
+        final boolean line;
+        final boolean diagonal;
 
-        public DirectMoveFinder(boolean line, boolean diag) {
+        public DirectMoveFinder(boolean line, boolean diagonal) {
             this.line = line;
-            this.diag = diag;
+            this.diagonal = diagonal;
         }
 
         @Override
         public List<Move> getMoves(Desk desk, int row, int column) {
             List<Move> ret = new LinkedList<>();
             if (line) {
-                addMovesByDirection(desk, row, column,  1,  0, ret);
-                addMovesByDirection(desk, row, column, -1,  0, ret);
-                addMovesByDirection(desk, row, column,  0, -1, ret);
-                addMovesByDirection(desk, row, column,  0,  1, ret);
+                addMovesByDirection(desk, row, column, 1, 0, ret);
+                addMovesByDirection(desk, row, column, -1, 0, ret);
+                addMovesByDirection(desk, row, column, 0, -1, ret);
+                addMovesByDirection(desk, row, column, 0, 1, ret);
             }
-            if (diag) {
-                addMovesByDirection(desk, row, column,  1,  1, ret);
-                addMovesByDirection(desk, row, column, -1,  1, ret);
-                addMovesByDirection(desk, row, column,  1, -1, ret);
+            if (diagonal) {
+                addMovesByDirection(desk, row, column, 1, 1, ret);
+                addMovesByDirection(desk, row, column, -1, 1, ret);
+                addMovesByDirection(desk, row, column, 1, -1, ret);
                 addMovesByDirection(desk, row, column, -1, -1, ret);
             }
             return ret;
         }
 
-        void addMovesByDirection(Desk desk, int row, int column, int drow, int dcolumn, List<Move> ret) {
-            int srow = row, scolumn = column;
-            row += drow;
-            column += dcolumn;
+        void addMovesByDirection(Desk desk, int row, int column, int dRow, int dColumn, List<Move> ret) {
+            int sRow = row, sColumn = column;
+            row += dRow;
+            column += dColumn;
             while (isFieldCordsCorrect(row, column) && desk.d[row][column] == null) {
-                ret.add(new SimpleMove(srow, scolumn, row, column));
-                row += drow;
-                column += dcolumn;
+                ret.add(new SimpleMove(sRow, sColumn, row, column));
+                row += dRow;
+                column += dColumn;
             }
             if (isFieldCordsCorrect(row, column) && desk.d[row][column].color ^ figure.color) {
-                ret.add(new SimpleMove(srow, scolumn, row, column));
+                ret.add(new SimpleMove(sRow, sColumn, row, column));
             }
         }
     }
 
-    static class PawnMoveFinder extends  MoveFinder {
-        int drow, startrow;
+    static class PawnMoveFinder extends MoveFinder {
+        final int dRow;
+        final int startRow;
 
-        public PawnMoveFinder(int drow, int startrow) {
-            this.drow = drow;
-            this.startrow = startrow;
+        public PawnMoveFinder(int dRow, int startRow) {
+            this.dRow = dRow;
+            this.startRow = startRow;
         }
 
         @Override
         List<Move> getMoves(Desk desk, int row, int column) {
             LinkedList<Move> ret = new LinkedList<>();
-            int nrow = row + drow;
-            if (isFieldCordsCorrect(nrow, column) && desk.d[nrow][column] == null) {
-                ret.add(new SimpleMove(row, column, nrow, column));
-                if (row == startrow && desk.d[row + 2 * drow][column] == null) {
-                    ret.add(new SimpleMove(row, column, row + 2 * drow, column));
+            int nRow = row + dRow;
+            if (isFieldCordsCorrect(nRow, column) && desk.d[nRow][column] == null) {
+                ret.add(new SimpleMove(row, column, nRow, column));
+                if (row == startRow && desk.d[row + 2 * dRow][column] == null) {
+                    ret.add(new SimpleMove(row, column, row + 2 * dRow, column));
                 }
             }
-            if (isFieldCordsCorrect(nrow, column - 1) && desk.d[nrow][column - 1] != null && desk.d[nrow][column - 1].color ^ figure.color) {
-                ret.add(new SimpleMove(row, column, nrow, column - 1));
+            if (isFieldCordsCorrect(nRow, column - 1) && desk.d[nRow][column - 1] != null && desk.d[nRow][column - 1].color ^ figure.color) {
+                ret.add(new SimpleMove(row, column, nRow, column - 1));
             }
-            if (isFieldCordsCorrect(nrow, column + 1) && desk.d[nrow][column + 1] != null && desk.d[nrow][column + 1].color ^ figure.color) {
-                ret.add(new SimpleMove(row, column, nrow, column + 1));
+            if (isFieldCordsCorrect(nRow, column + 1) && desk.d[nRow][column + 1] != null && desk.d[nRow][column + 1].color ^ figure.color) {
+                ret.add(new SimpleMove(row, column, nRow, column + 1));
             }
             return ret;
         }
@@ -118,25 +118,26 @@ public  class Figure {
 
     static class FieldCheckMoveFinder extends MoveFinder {
 
-        int[] drow, dcolumn;
+        final int[] dRow;
+        final int[] dColumn;
 
-        public FieldCheckMoveFinder(int[] drow, int[] dcolumn) {
-            this.drow = drow;
-            this.dcolumn = dcolumn;
-    }
+        public FieldCheckMoveFinder(int[] dRow, int[] dColumn) {
+            this.dRow = dRow;
+            this.dColumn = dColumn;
+        }
 
-        void checkMoveField(Desk desk, int row, int column, int drow, int dcolumn, List<Move> ret) {
-            int nrow = row + drow, ncolumn = column + dcolumn;
-            if (isFieldCordsCorrect(nrow, ncolumn) && (desk.d[nrow][ncolumn] == null || desk.d[nrow][ncolumn].color ^ figure.color)) {
-                ret.add(new SimpleMove(row, column, nrow, ncolumn));
+        void checkMoveField(Desk desk, int row, int column, int dRow, int dColumn, List<Move> ret) {
+            int nRow = row + dRow, nColumn = column + dColumn;
+            if (isFieldCordsCorrect(nRow, nColumn) && (desk.d[nRow][nColumn] == null || desk.d[nRow][nColumn].color ^ figure.color)) {
+                ret.add(new SimpleMove(row, column, nRow, nColumn));
             }
         }
 
         @Override
         List<Move> getMoves(Desk desk, int row, int column) {
             LinkedList<Move> ret = new LinkedList<>();
-            for (int i = 0; i < drow.length; i++) {
-                checkMoveField(desk, row, column, drow[i], dcolumn[i], ret);
+            for (int i = 0; i < dRow.length; i++) {
+                checkMoveField(desk, row, column, dRow[i], dColumn[i], ret);
             }
             return ret;
         }
@@ -147,14 +148,14 @@ public  class Figure {
         Figure king, rook;
 
         public KingMoveFinder() {
-            super(KING_DROW, KING_DCOLUMN);
+            super(KING_D_ROW, KING_D_COLUMN);
         }
 
-        private Move checkCastling(Desk desk, int row, int column, int dcolumn) {
+        private Move checkCastling(Desk desk, int row, int column, int dColumn) {
             int startKingColumn = column, startRookColumn = -1;
             boolean rookFind = false;
 
-            for(column += dcolumn; column < 8 && column >= 0; column += dcolumn) {
+            for (column += dColumn; column < 8 && column >= 0; column += dColumn) {
                 Figure f = desk.d[row][column];
                 if (f != null) {
                     if (f == rook) {
@@ -166,7 +167,7 @@ public  class Figure {
                     }
                 }
             }
-            for(column += dcolumn; column <= 6 && column >=2; column += dcolumn) {
+            for (column += dColumn; column <= 6 && column >= 2; column += dColumn) {
                 Figure f = desk.d[row][column];
                 if (f != null) {
                     return null;
@@ -177,7 +178,7 @@ public  class Figure {
 
         @Override
         List<Move> getMoves(Desk desk, int row, int column) {
-            Chess chess = (Chess)desk.game;
+            Chess chess = (Chess) desk.game;
             List<Move> ret = super.getMoves(desk, row, column);
             king = desk.d[row][column];
             rook = king.color ? BLACK_ROOK : WHITE_ROOK;
@@ -205,14 +206,14 @@ public  class Figure {
         }
     }
 
-    static final int[] KNIGHT_DROW    = new int[] {2, 1, -2, -1, 2, 1, -2, -1};
-    static final int[] KNIGHT_DCOLUMN = new int[] {1, 2, 1, 2, -1, -2, -1, -2};
+    private static final int[] KNIGHT_D_ROW = new int[]{2, 1, -2, -1, 2, 1, -2, -1};
+    private static final int[] KNIGHT_D_COLUMN = new int[]{1, 2, 1, 2, -1, -2, -1, -2};
 
-    static final int[] KING_DROW    = new int[] {1, 0, -1, 0, 1, -1, 1, -1};
-    static final int[] KING_DCOLUMN = new int[] {0, 1, 0, -1, 1, 1, -1, -1};
+    private static final int[] KING_D_ROW = new int[]{1, 0, -1, 0, 1, -1, 1, -1};
+    private static final int[] KING_D_COLUMN = new int[]{0, 1, 0, -1, 1, 1, -1, -1};
 
-    public static final Figure WHITE_PAWN = new Figure(Chess.WHITE, new PawnMoveFinder( 1, 1));
-    public static final Figure BLACK_PAWN = new Figure(Chess.BLACK,  new PawnMoveFinder(-1, 6));
+    public static final Figure WHITE_PAWN = new Figure(Chess.WHITE, new PawnMoveFinder(1, 1));
+    public static final Figure BLACK_PAWN = new Figure(Chess.BLACK, new PawnMoveFinder(-1, 6));
 
     public static final Figure WHITE_ROOK = new Figure(Chess.WHITE, new DirectMoveFinder(true, false));
     public static final Figure BLACK_ROOK = new Figure(Chess.BLACK, new DirectMoveFinder(true, false));
@@ -220,8 +221,8 @@ public  class Figure {
     public static final Figure WHITE_BISHOP = new Figure(Chess.WHITE, new DirectMoveFinder(false, true));
     public static final Figure BLACK_BISHOP = new Figure(Chess.BLACK, new DirectMoveFinder(false, true));
 
-    public static final Figure WHITE_KNIGHT = new Figure(Chess.WHITE, new FieldCheckMoveFinder(KNIGHT_DROW, KNIGHT_DCOLUMN));
-    public static final Figure BLACK_KNIGHT = new Figure(Chess.BLACK, new FieldCheckMoveFinder(KNIGHT_DROW, KNIGHT_DCOLUMN));
+    public static final Figure WHITE_KNIGHT = new Figure(Chess.WHITE, new FieldCheckMoveFinder(KNIGHT_D_ROW, KNIGHT_D_COLUMN));
+    public static final Figure BLACK_KNIGHT = new Figure(Chess.BLACK, new FieldCheckMoveFinder(KNIGHT_D_ROW, KNIGHT_D_COLUMN));
 
     public static final Figure WHITE_QUEEN = new Figure(Chess.WHITE, new DirectMoveFinder(true, true));
     public static final Figure BLACK_QUEEN = new Figure(Chess.BLACK, new DirectMoveFinder(true, true));

@@ -1,5 +1,4 @@
-package lec.chessproto.chess;
-
+package itmo.courseproject.chess;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -8,21 +7,18 @@ import java.util.List;
 public class Chess extends Game {
 
 
-
     private List<MoveTree>[][] deskMoves;
 
-    boolean isBlackLongCastlingEnabled ,
+    boolean isBlackLongCastlingEnabled,
             isBlackShortCastlingEnabled,
-            isWhiteLongCastlingEnabled ,
+            isWhiteLongCastlingEnabled,
             isWhiteShortCastlingEnabled;
-    int lwrColumn = -1, rwrColumn = -1, lbrColumn = -1, rbrColumn = -1;
-    Point blackKing, whiteKing;
+    private int lwrColumn = -1, rwrColumn = -1, lbrColumn = -1, rbrColumn = -1;
+    private Point blackKing, whiteKing;
 
     @SuppressWarnings("unchecked")
     public Chess(Figure[][] d, boolean turn, Player whitePlayer, Player blackPlayer) {
         super(d, turn, whitePlayer, blackPlayer);
-
-
 
         for (int i = 0; i < Desk.SIZE; i++) {
             for (int j = 0; j < Desk.SIZE; j++) {
@@ -67,7 +63,7 @@ public class Chess extends Game {
     }
 
     private static class MoveTree {
-        Move move;
+        final Move move;
 
         List<Move>[][] nextMoves;
 
@@ -115,7 +111,7 @@ public class Chess extends Game {
     }
 
 
-    boolean  moveFigure(Player player, Move move) {
+    boolean moveFigure(Player player, Move move) {
         if (deskMoves[move.startRow][move.startColumn] == null) {
             return false;
         }
@@ -126,7 +122,7 @@ public class Chess extends Game {
             return false;
         }
         move = deskMoves[move.startRow][move.startColumn].get(index).move;
-        Point king =(desk.turn ? blackKing : whiteKing);
+        Point king = (desk.turn ? blackKing : whiteKing);
         if (king.equals(move.startRow, move.startColumn)) {
             king.set(move.endRow, move.endColumn);
             if (desk.turn) {
@@ -170,7 +166,7 @@ public class Chess extends Game {
 
         for (int i = 0; i < Desk.SIZE; i++) {
             for (int j = 0; j < Desk.SIZE; j++) {
-                if (desk.d[i][j] != null  && desk.d[i][j].color == desk.turn) {
+                if (desk.d[i][j] != null && desk.d[i][j].color == desk.turn) {
                     ret[i][j] = desk.d[i][j].getMoves(desk, i, j);
                 }
             }
@@ -192,7 +188,7 @@ public class Chess extends Game {
                 for (Move m : moves[i][j]) {
                     for (Point p : pointToCheck) {
                         if (p.equals(m.endRow, m.endColumn)) {
-                            isCorrect =  false;
+                            isCorrect = false;
                             return moves;
                         }
                     }
@@ -203,7 +199,7 @@ public class Chess extends Game {
                 }
             }
         }
-        isCorrect =  true;
+        isCorrect = true;
         return moves;
     }
 
@@ -218,15 +214,15 @@ public class Chess extends Game {
                 deskMoves[i][j] = new ArrayList<>(moves[i][j].size());
                 for (Move m : moves[i][j]) {
                     desk.executeMove(m);
-                    List<Move>[][] generatedMoves = null;
+                    List<Move>[][] generatedMoves;
                     if (m instanceof Castling) {
                         int sC = Math.min(m.startColumn, m.endColumn);
                         int eC = Math.max(m.startColumn, m.endColumn);
                         Point[] points = new Point[eC - sC + 1];
                         for (int k = sC; k <= eC; k++) {
                             points[k - sC] = new Point(m.startRow, k);
-                        generatedMoves = checkNonTarget(points);
                         }
+                        generatedMoves = checkNonTarget(points);
                     } else {
                         generatedMoves = checkNonTarget();
                     }

@@ -1,8 +1,8 @@
-package lec.chessproto.chess;
+package itmo.courseproject.chess;
 
 import java.util.List;
 
-public abstract class Player  {
+public abstract class Player {
 
     Game game;
     boolean color;

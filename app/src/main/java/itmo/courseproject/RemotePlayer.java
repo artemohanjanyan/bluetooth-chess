@@ -1,16 +1,13 @@
-package lec.chessproto;
+package itmo.courseproject;
 
-import lec.chessproto.chess.Move;
-import lec.chessproto.chess.Player;
+import itmo.courseproject.chess.Move;
+import itmo.courseproject.chess.Player;
 
-public class RemotePlayer extends Player implements  BluetoothService.OnMessageReceivedListener {
+public class RemotePlayer extends Player implements BluetoothService.OnMessageReceivedListener {
 
-    BluetoothService btService;
-    BtGameActivity activity;
-
+    private final BtGameActivity activity;
 
     public RemotePlayer(BluetoothService btService, BtGameActivity activity) {
-        this.btService = btService;
         this.activity = activity;
         btService.setOnMessageReceivedListener(this);
     }

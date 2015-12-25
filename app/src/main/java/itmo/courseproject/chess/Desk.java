@@ -1,4 +1,4 @@
-package lec.chessproto.chess;
+package itmo.courseproject.chess;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -7,9 +7,9 @@ import java.util.Random;
 public class Desk {
 
     private class FieldChangesScope {
-        List<Point> fields;
-        Figure[] figures;
-        boolean turnChanged;
+        final List<Point> fields;
+        final Figure[] figures;
+        final boolean turnChanged;
 
         public FieldChangesScope(List<Point> fields, boolean turnChanged) {
             this.fields = fields;
@@ -26,7 +26,7 @@ public class Desk {
             int i = 0;
             while (i < fields.size()) {
                 Point field = fields.get(i);
-                Figure figure = desk.d [field.row][field.column];
+                Figure figure = desk.d[field.row][field.column];
                 desk.d[field.row][field.column] = figures[i];
                 figures[i] = figure;
                 i++;
@@ -37,14 +37,15 @@ public class Desk {
         }
     }
 
-    LinkedList<FieldChangesScope> undoScopes, redoScopes;
+    private final LinkedList<FieldChangesScope> undoScopes;
+    private final LinkedList<FieldChangesScope> redoScopes;
 
     public static final int SIZE = 8;
 
     private static final Random rnd = new Random();
 
     public static Figure[][] getClassicStartPosition() {
-        return new Figure[][] {
+        return new Figure[][]{
                 new Figure[]{Figure.WHITE_ROOK, Figure.WHITE_KNIGHT, Figure.WHITE_BISHOP, Figure.WHITE_QUEEN, Figure.WHITE_KING, Figure.WHITE_BISHOP, Figure.WHITE_KNIGHT, Figure.WHITE_ROOK},
                 new Figure[]{Figure.WHITE_PAWN, Figure.WHITE_PAWN, Figure.WHITE_PAWN, Figure.WHITE_PAWN, Figure.WHITE_PAWN, Figure.WHITE_PAWN, Figure.WHITE_PAWN, Figure.WHITE_PAWN},
                 new Figure[]{null, null, null, null, null, null, null, null},
@@ -63,59 +64,59 @@ public class Desk {
             d[6][i] = Figure.BLACK_PAWN;
         }
 
-        boolean[] plased = new boolean[8];
+        boolean[] placed = new boolean[8];
         int field;
 
         field = rnd.nextInt(4) * 2 + 1;     // first bishop position
-        plased[field] = true;
+        placed[field] = true;
         d[0][field] = Figure.WHITE_BISHOP;
         d[7][field] = Figure.BLACK_BISHOP;
 
         field = rnd.nextInt(4) * 2;         // second bishop position
-        plased[field] = true;
+        placed[field] = true;
         d[0][field] = Figure.WHITE_BISHOP;
         d[7][field] = Figure.BLACK_BISHOP;
 
         field = rnd.nextInt(6);             // queen position
-        for (int i = 0; i <= field; i++)   if (plased[i]) field++;
-        plased[field] = true;
+        for (int i = 0; i <= field; i++) if (placed[i]) field++;
+        placed[field] = true;
         d[0][field] = Figure.WHITE_QUEEN;
         d[7][field] = Figure.BLACK_QUEEN;
 
         field = rnd.nextInt(5);             // first knight position
-        for (int i = 0; i <= field; i++)  if (plased[i]) field++;
-        plased[field] = true;
+        for (int i = 0; i <= field; i++) if (placed[i]) field++;
+        placed[field] = true;
         d[0][field] = Figure.WHITE_KNIGHT;
         d[7][field] = Figure.BLACK_KNIGHT;
 
         field = rnd.nextInt(4);             // second knight position
-        for (int i = 0; i <= field; i++)  if (plased[i]) field++;
-        plased[field] = true;
+        for (int i = 0; i <= field; i++) if (placed[i]) field++;
+        placed[field] = true;
         d[0][field] = Figure.WHITE_KNIGHT;
         d[7][field] = Figure.BLACK_KNIGHT;
 
         field = 0;
 
-        while (plased[field]) field++;      // first rook position
-        plased[field] = true;
+        while (placed[field]) field++;      // first rook position
+        placed[field] = true;
         d[0][field] = Figure.WHITE_ROOK;
         d[7][field] = Figure.BLACK_ROOK;
 
-        while (plased[field]) field++;      // king position
-        plased[field] = true;
+        while (placed[field]) field++;      // king position
+        placed[field] = true;
         d[0][field] = Figure.WHITE_KING;
         d[7][field] = Figure.BLACK_KING;
 
-        while (plased[field]) field++;      // second rook position
-        plased[field] = true;
+        while (placed[field]) field++;      // second rook position
+        placed[field] = true;
         d[0][field] = Figure.WHITE_ROOK;
         d[7][field] = Figure.BLACK_ROOK;
 
         return d;
     }
 
-    Figure[][] d;
-    Game game;
+    final Figure[][] d;
+    final Game game;
     boolean turn;       // false - white player, false - black.
 
     public Desk(Game game, Figure[][] d, boolean turn) {
@@ -131,27 +132,12 @@ public class Desk {
         return d[row][column];
     }
 
-    public boolean getTurn() {
-        return turn;
-    }
-
-    void switchTurn() {
+    private void switchTurn() {
         turn = !turn;
     }
 
-    Desk getMoveExecutedDesk(Move move) {
-        Figure[][] fCopy = new Figure[Desk.SIZE][Desk.SIZE];
-
-        for (int i = 0; i < Desk.SIZE; i++) {
-            System.arraycopy(d[i], 0, fCopy[i], 0, Desk.SIZE);
-        }
-        Desk ret = new Desk(game, fCopy, turn);
-        ret.executeMove(move);
-
-        return ret;
-    }
-
     boolean executeMove(Move move) {
+        // TODO
         FieldChangesScope scope = new FieldChangesScope(move.getChangedFields(), move.terminal);
         undoScopes.add(scope);
         move.execute(this);
@@ -170,7 +156,7 @@ public class Desk {
     }
 
 
-    boolean moveFieldChangeScope(LinkedList<FieldChangesScope> from, LinkedList<FieldChangesScope> to) {
+    private static boolean moveFieldChangeScope(LinkedList<FieldChangesScope> from, LinkedList<FieldChangesScope> to) {
         if (from.isEmpty()) {
             return false;
         }
