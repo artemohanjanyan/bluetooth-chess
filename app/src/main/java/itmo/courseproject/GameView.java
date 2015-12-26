@@ -27,7 +27,7 @@ public class GameView extends View {
     private static final String TAG = "GameView";
     private static final List<Move> EMPTY_MOVE_LIST = new LinkedList<>();
 
-    private static final int FIGURES_COUNT = 12;
+    private static final int FIGURES_COUNT = Figure.figures.size();
 
     public Desk desk;
 
@@ -36,12 +36,13 @@ public class GameView extends View {
     private Rect dstRect, srcRect, drgRect;
 
     private Bitmap[] figureBitmapMap;
-    private int figureBitmapSize;
 
 
     private boolean selected, dragged, touchDowned;
     private int sRow = -1, sColumn = -1; // selected field position
     private int dragX, dragY; // dragged figure position
+    private boolean moveShown;
+    private Move shownMove;
 
     private Resources res;
     private Resources.Theme theme;
@@ -101,14 +102,19 @@ public class GameView extends View {
         loadFigureBitmap(Figure.BLACK_QUEEN.getID(), R.drawable.black_queen);
         loadFigureBitmap(Figure.BLACK_KING.getID(), R.drawable.black_king);
 
-        figureBitmapSize = figureBitmapMap[0].getWidth();
+        int figureBitmapSize = figureBitmapMap[0].getWidth();
         srcRect = new Rect(0, 0, figureBitmapSize, figureBitmapSize);
         dstRect = new Rect();
         drgRect = new Rect();
     }
 
     private void loadFigureBitmap(int k, int id) {
-        BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(id, theme);
+        BitmapDrawable drawable;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            drawable = (BitmapDrawable) res.getDrawable(id, theme);
+        } else  {
+            drawable = (BitmapDrawable) res.getDrawable(id);
+        }
         if (drawable != null)
             figureBitmapMap[k] = drawable.getBitmap();
     }
@@ -139,17 +145,25 @@ public class GameView extends View {
             }
         }
 
+        if (isInEditMode())
+            return;
+
         if (sRow != -1 && sColumn != -1) {
             drawField(canvas, sRow, sColumn, getFieldPressedPaint(sRow, sColumn));
         }
-        if (markerMoves != null) {
-            for (Move m : markerMoves) {
-                int row = m.endRow, column = m.endColumn;
-                drawField(canvas, row, column, getFieldPressedPaint(row, column));
+
+        if (moveShown) {
+            drawField(canvas, shownMove.startRow, shownMove.startColumn, getFieldPressedPaint(shownMove.startRow, shownMove.startColumn));
+            drawField(canvas, shownMove.endRow, shownMove.endColumn, getFieldPressedPaint(shownMove.endRow, shownMove.endColumn));
+        } else {
+            if (markerMoves != null) {
+                for (Move m : markerMoves) {
+                    int row = m.endRow, column = m.endColumn;
+                    drawField(canvas, row, column, getFieldPressedPaint(row, column));
+                }
             }
         }
-        if (isInEditMode())
-            return;
+
 
         if (desk == null)
             return;
@@ -231,7 +245,9 @@ public class GameView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                trySelect(row, column);
+                if (!selected || (desk.getFigure(row, column) != null && desk.getFigure(row, column) == desk.getFigure(sRow, column))) {
+                    trySelect(row, column);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (selected) {
@@ -245,13 +261,12 @@ public class GameView extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 if (selected) {
-                    if (touchDowned) {
-                        touchDowned = false;
-                        break;
-                    }
-                    localPlayer.moveFigure(new SimpleMove(sRow, sColumn, row, column));
-                    deselect();
+                    boolean moved = localPlayer.moveFigure(new SimpleMove(sRow, sColumn, row, column));
+                    touchDowned = false;
                     dragged = false;
+                    if (moved) {
+                        deselect();
+                    }
                 }
                 break;
             default:
@@ -264,6 +279,9 @@ public class GameView extends View {
     private void trySelect(int row, int column) {
         if (desk.getFigure(row, column) != null) {
             markerMoves = localPlayer.chooseFigure(row, column);
+            if (!markerMoves.isEmpty()) {
+                moveShown = false;
+            }
             selected = true;
             sRow = row;
             sColumn = column;
@@ -289,5 +307,11 @@ public class GameView extends View {
         drgRect.offset(x - dragX, y - dragY);
         dragX = x;
         dragY = y;
+    }
+
+    public void showMove(Move move) {
+        markerMoves = null;
+        moveShown  = true;
+        shownMove = move;
     }
 }

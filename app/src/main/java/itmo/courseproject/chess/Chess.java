@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Chess extends Game {
+public final class Chess extends Game {
 
 
     private List<MoveTree>[][] deskMoves;

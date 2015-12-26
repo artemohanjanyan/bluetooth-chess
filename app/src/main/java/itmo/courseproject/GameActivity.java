@@ -71,7 +71,7 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
 
     @Override
     public void onMoveExecuted(Move move) {
-        gameView.markerMoves = null;
+        gameView.showMove(move);
         gameView.invalidate();
     }
 
