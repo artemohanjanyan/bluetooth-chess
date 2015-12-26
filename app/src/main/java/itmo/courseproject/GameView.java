@@ -108,7 +108,10 @@ public class GameView extends View {
     }
 
     private void loadFigureBitmap(int k, int id) {
-        BitmapDrawable drawable = (BitmapDrawable) res.getDrawable(id, theme);
+        BitmapDrawable drawable = (BitmapDrawable)
+                ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                        ? res.getDrawable(id, theme)
+                        : res.getDrawable(id));
         if (drawable != null)
             figureBitmapMap[k] = drawable.getBitmap();
     }
