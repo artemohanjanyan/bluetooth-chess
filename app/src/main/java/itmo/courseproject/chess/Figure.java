@@ -7,17 +7,17 @@ import java.util.List;
 
 public class Figure {
 
-    private static final ArrayList<Figure> figures = new ArrayList<>();
+    static final ArrayList<Figure> figures = new ArrayList<>();
 
     public final boolean color;
     private final MoveFinder m;
-    private final int ID;
+    private final byte ID;
 
     private Figure(boolean color, MoveFinder m) {
         this.color = color;
         this.m = m;
         m.figure = this;
-        this.ID = figures.size();
+        this.ID = (byte) figures.size();
         figures.add(this);
     }
 
@@ -29,7 +29,7 @@ public class Figure {
         return color;
     }
 
-    public int getID() {
+    public byte getID() {
         return ID;
     }
 
@@ -90,28 +90,54 @@ public class Figure {
     static class PawnMoveFinder extends MoveFinder {
         final int dRow;
         final int startRow;
+        final int endRow;
+        final int enPassantRow;
 
-        public PawnMoveFinder(int dRow, int startRow) {
+        int row, column, nRow, nnRow;
+        Figure opPawn, f;
+
+        public PawnMoveFinder(int dRow) {
             this.dRow = dRow;
-            this.startRow = startRow;
+            this.startRow =     dRow == 1 ? 1 : 6;
+            this.endRow =       dRow == 1 ? 6 : 1;
+            this.enPassantRow = dRow == 1 ? 4 : 3;
+        }
+
+        public void checkPieceTakenMove(Desk desk, int dColumn, List<Move> ret) {
+            int nColumn = column + dColumn;
+            if (isFieldCordsCorrect(nRow, nColumn)) {
+                if (desk.d[nRow][nColumn] != null && desk.d[nRow][nColumn].color ^ figure.color) {
+                    ret.add(new SimpleMove(row, column, nRow, nColumn, f));
+                }
+                if (row == enPassantRow && desk.d[row][nColumn] == opPawn && desk.d[nnRow][nColumn] == null) {
+                    desk.undoMove();
+                    if (desk.d[row][nColumn] == null && desk.d[nnRow][nColumn] == opPawn) {
+                        ret.add(new PieceTakenMove(row, column, nRow, nColumn, row, nColumn));
+                    }
+                    desk.redoMove();
+                }
+            }
         }
 
         @Override
         List<Move> getMoves(Desk desk, int row, int column) {
             LinkedList<Move> ret = new LinkedList<>();
-            int nRow = row + dRow;
+
+            this.row = row;
+            this.column = column;
+            nRow = row + dRow;
+            nnRow = nRow + dRow;
+            opPawn = figure.color ? WHITE_PAWN : BLACK_PAWN;
+            f = row == endRow ? (figure.color ? Figure.BLACK_QUEEN : Figure.WHITE_QUEEN) : null;
+
             if (isFieldCordsCorrect(nRow, column) && desk.d[nRow][column] == null) {
-                ret.add(new SimpleMove(row, column, nRow, column));
-                if (row == startRow && desk.d[row + 2 * dRow][column] == null) {
-                    ret.add(new SimpleMove(row, column, row + 2 * dRow, column));
+                ret.add(new SimpleMove(row, column, nRow, column, f));
+                if (row == startRow && desk.d[nnRow][column] == null) {
+                    ret.add(new SimpleMove(row, column, nnRow, column));
                 }
             }
-            if (isFieldCordsCorrect(nRow, column - 1) && desk.d[nRow][column - 1] != null && desk.d[nRow][column - 1].color ^ figure.color) {
-                ret.add(new SimpleMove(row, column, nRow, column - 1));
-            }
-            if (isFieldCordsCorrect(nRow, column + 1) && desk.d[nRow][column + 1] != null && desk.d[nRow][column + 1].color ^ figure.color) {
-                ret.add(new SimpleMove(row, column, nRow, column + 1));
-            }
+            checkPieceTakenMove(desk, -1, ret);
+            checkPieceTakenMove(desk, +1, ret);
             return ret;
         }
     }
@@ -212,8 +238,8 @@ public class Figure {
     private static final int[] KING_D_ROW = new int[]{1, 0, -1, 0, 1, -1, 1, -1};
     private static final int[] KING_D_COLUMN = new int[]{0, 1, 0, -1, 1, 1, -1, -1};
 
-    public static final Figure WHITE_PAWN = new Figure(Chess.WHITE, new PawnMoveFinder(1, 1));
-    public static final Figure BLACK_PAWN = new Figure(Chess.BLACK, new PawnMoveFinder(-1, 6));
+    public static final Figure WHITE_PAWN = new Figure(Chess.WHITE, new PawnMoveFinder(1));
+    public static final Figure BLACK_PAWN = new Figure(Chess.BLACK, new PawnMoveFinder(-1));
 
     public static final Figure WHITE_ROOK = new Figure(Chess.WHITE, new DirectMoveFinder(true, false));
     public static final Figure BLACK_ROOK = new Figure(Chess.BLACK, new DirectMoveFinder(true, false));

@@ -137,7 +137,7 @@ public class Desk {
     }
 
     boolean executeMove(Move move) {
-        // TODO
+        redoScopes.clear();
         FieldChangesScope scope = new FieldChangesScope(move.getChangedFields(), move.terminal);
         undoScopes.add(scope);
         move.execute(this);
@@ -152,7 +152,7 @@ public class Desk {
     }
 
     boolean redoMove() {
-        return moveFieldChangeScope(undoScopes, redoScopes);
+        return moveFieldChangeScope(redoScopes, undoScopes);
     }
 
 
