@@ -10,6 +10,13 @@ public abstract class Game {
     final Player whitePlayer;
     final Player blackPlayer;
 
+    public static final int LOSE = 0;
+    public static final int WIN  = 1;
+    public static final int DRAW = 2;
+
+    public static final int WHITE_PLAYER_WINS = 0;
+    public static final int BLACK_PLAYER_WINS = 1;
+
     final Desk desk;
 
     Game(Figure[][] d, boolean turn, Player whitePlayer, Player blackPlayer) {
@@ -33,7 +40,7 @@ public abstract class Game {
 
         void onMoveExecuted(Move move);
 
-        void onGameOver(boolean winner);
+        void onGameOver(int gameOverMsg);
     }
 
     Listener listener;
@@ -74,13 +81,18 @@ public abstract class Game {
         return desk;
     }
 
-    void gameOver(boolean _winner) {
-        Player winner = (_winner) ? blackPlayer : whitePlayer;
-        Player loser = (_winner) ? whitePlayer : blackPlayer;
-        winner.gameOver(true);
-        loser.gameOver(false);
+    void gameOver(int gameOverMsg) {
+        if (gameOverMsg == DRAW) {
+            whitePlayer.gameOver(DRAW);
+            blackPlayer.gameOver(DRAW);
+        } else {
+            Player winner = (gameOverMsg == WHITE_PLAYER_WINS) ? whitePlayer : blackPlayer;
+            Player loser =  (gameOverMsg == BLACK_PLAYER_WINS) ? whitePlayer : blackPlayer;
+            winner.gameOver(WIN);
+            loser.gameOver(LOSE);
+        }
         if (listener != null) {
-            listener.onGameOver(_winner);
+            listener.onGameOver(gameOverMsg);
         }
     }
 }

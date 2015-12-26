@@ -115,6 +115,14 @@ public class Desk {
         return d;
     }
 
+    public static Figure[][] getTestPosition() {
+        Figure[][] d = new Figure[SIZE][SIZE];
+        d[0][2] = Figure.WHITE_KING;
+        d[0][0] = Figure.BLACK_KING;
+        d[7][1] = Figure.WHITE_QUEEN;
+        return d;
+    }
+
     final Figure[][] d;
     final Game game;
     boolean turn;       // false - white player, false - black.

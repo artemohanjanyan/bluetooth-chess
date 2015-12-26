@@ -14,6 +14,24 @@ public abstract class Move {
     }
 
 
+    private static class EmptyMove extends Move {
+
+
+        protected EmptyMove() {
+            super(0, 0, 0, 0);
+        }
+
+        @Override
+        void execute(Desk desk) {
+        }
+
+        @Override
+        public byte[] toBytes() {
+            return new byte[0];
+        }
+    }
+    public static final Move EMPTY_MOVE = new EmptyMove();
+
     public final int startRow, startColumn, endRow, endColumn;
     public final boolean terminal;
 

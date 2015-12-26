@@ -149,12 +149,12 @@ public final class Chess extends Game {
 
         desk.executeMove(move);
         List<Move>[][] nextMoves = deskMoves[move.startRow][move.startColumn].get(index).nextMoves;
-        boolean isMate = !genDeskMoves(nextMoves);
+        int state = genDeskMoves(nextMoves);
 
         onMoveExecution(player, move);
 
-        if (isMate) {
-            gameOver(!desk.turn);
+        if (state != -1) {
+            gameOver(state);
         }
 
         return true;
@@ -203,7 +203,7 @@ public final class Chess extends Game {
         return moves;
     }
 
-    private boolean genDeskMoves(List<Move>[][] moves) {
+    private int genDeskMoves(List<Move>[][] moves) {
         boolean hasMoves = false;
         for (int i = 0; i < Desk.SIZE; i++) {
             for (int j = 0; j < Desk.SIZE; j++) {
@@ -234,7 +234,16 @@ public final class Chess extends Game {
                 }
             }
         }
-        return hasMoves;
+        if (!hasMoves) {
+            desk.executeMove(Move.EMPTY_MOVE);
+            checkNonTarget();
+            desk.redoMove();
+            if (isCorrect) {
+                return DRAW;
+            }
+            return (desk.turn) ? BLACK_PLAYER_WINS : WHITE_PLAYER_WINS;
+        }
+        return -1;
     }
 
 }

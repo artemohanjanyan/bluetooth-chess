@@ -245,7 +245,7 @@ public class GameView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if (!selected || (desk.getFigure(row, column) != null && desk.getFigure(row, column) == desk.getFigure(sRow, column))) {
+                if (desk.getFigure(row, column) != null && desk.getFigure(row, column).getColor() == localPlayer.getColor()) {
                     trySelect(row, column);
                 }
                 break;
@@ -253,8 +253,9 @@ public class GameView extends View {
                 if (selected) {
                     if (touchDowned) {
                         touchDowned = false;
-                        startDragFigure(x, y);
-                    } else if (dragged) {
+                        dragged = true;
+                    }
+                    if (dragged) {
                         updateDragPos(x, y);
                     }
                 }
@@ -296,17 +297,10 @@ public class GameView extends View {
         sColumn = -1;
     }
 
-    private void startDragFigure(int x, int y) {
-        drgRect.offsetTo(x - fieldSize, y - fieldSize);
-        dragX = x;
-        dragY = y;
-        dragged = true;
-    }
+
 
     private void updateDragPos(int x, int y) {
-        drgRect.offset(x - dragX, y - dragY);
-        dragX = x;
-        dragY = y;
+        drgRect.offsetTo(x - fieldSize, y - fieldSize);
     }
 
     public void showMove(Move move) {
