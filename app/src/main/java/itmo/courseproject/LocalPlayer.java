@@ -24,7 +24,6 @@ public class LocalPlayer extends Player {
     }
 
     @Override
-    public void gameOver(boolean isWinner) {
-
+    public void gameOver(int gameOverMsg) {
     }
 }

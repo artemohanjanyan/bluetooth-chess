@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Figure {
+public final class Figure {
 
-    static final ArrayList<Figure> figures = new ArrayList<>();
+    public static final ArrayList<Figure> figures = new ArrayList<>();
 
     public final boolean color;
     private final MoveFinder m;

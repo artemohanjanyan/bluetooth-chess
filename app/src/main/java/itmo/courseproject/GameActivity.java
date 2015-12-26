@@ -27,8 +27,9 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
     protected Player whitePlayer;
     protected Player blackPlayer;
 
-    private static final int CHESS_CLS = 0;
-    private static final int CHESS_960 = 1;
+    static final int CHESS_CLASSIC = 0;
+    static final int CHESS_960 = 1;
+    static final int CHESS_TEST = -1;
     static final String GAME = "game";
 
     protected Intent initialIntent;
@@ -43,17 +44,20 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
         super.onCreate(savedInstanceState);
 
         initialIntent = getIntent();
-        int gameId = initialIntent.getIntExtra(GAME, CHESS_CLS);
+        int gameId = initialIntent.getIntExtra(GAME, CHESS_CLASSIC);
         setContentView(R.layout.activity_chess_view);
         gameView = (GameView) findViewById(R.id.chess);
         gameOverText = (TextView) findViewById(R.id.game_over_text);
 
         switch (gameId) {
-            case CHESS_CLS:
+            case CHESS_CLASSIC:
                 f = Desk.getClassicStartPosition();
                 break;
             case CHESS_960:
                 f = Desk.getRandomFisherStartPosition();
+                break;
+            case CHESS_TEST:
+                f = Desk.getTestPosition();
                 break;
             default:
                 throw new RuntimeException("this game doesn't supported");
@@ -71,7 +75,7 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
 
     @Override
     public void onMoveExecuted(Move move) {
-        gameView.markerMoves = null;
+        gameView.showMove(move);
         gameView.invalidate();
     }
 
@@ -83,8 +87,12 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
     }
 
     @Override
-    public void onGameOver(boolean winner) {
-        String str = "Game over : " + Game.getColorName(winner) + " wins";
+    public void onGameOver(int gameOverMsg) {
+        String str = "Game over : " + (
+                gameOverMsg == Game.DRAW ?
+                        "draw" :
+                        Game.getColorName(gameOverMsg == Game.BLACK_PLAYER_WINS) + " wins"
+        );
         gameOverText.setText(str);
         Log.d(TAG, str);
     }
