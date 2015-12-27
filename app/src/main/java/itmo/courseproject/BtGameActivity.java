@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 public class BtGameActivity extends GameActivity {
     private static final String TAG = "BtGameActivity";
@@ -40,6 +42,22 @@ public class BtGameActivity extends GameActivity {
             btService = null;
         }
     };
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (btService != null) {
+            btService.stopSelf();
+            btService = null;
+        }
+        finish();
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void initPlayers() {
