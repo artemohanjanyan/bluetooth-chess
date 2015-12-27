@@ -12,28 +12,17 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".LocalGameActivity"/>
+        <activity android:name=".LocalGameActivity"
+            android:screenOrientation="portrait"/>
 
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/chat_name"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+        <activity android:name=".DeviceChooser"
+            android:screenOrientation="portrait"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".DeviceChooser" />
-
-        <service android:name=".BluetoothService" />
-
-        <activity android:name=".BtGameActivity"/>
+        <activity android:name=".BtGameActivity"
+            android:screenOrientation="portrait"/>
 
         <activity android:name=".MenuActivity"
-            android:label="@string/menu_name">
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -42,7 +31,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".TmpActivity"/>
+        <service android:name=".BluetoothService" />
     </application>
 
 </manifest>

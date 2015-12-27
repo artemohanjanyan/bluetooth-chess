@@ -6,10 +6,18 @@ import itmo.courseproject.chess.Player;
 public class RemotePlayer extends Player implements BluetoothService.OnMessageReceivedListener {
 
     private final BtGameActivity activity;
+    private final BluetoothService btService;
 
     public RemotePlayer(BluetoothService btService, BtGameActivity activity) {
         this.activity = activity;
+        this.btService = btService;
         btService.setOnMessageReceivedListener(this);
+    }
+
+    @Override
+    public boolean moveFigure(Move move) {
+        btService.logMove(move);
+        return super.moveFigure(move);
     }
 
     @Override
@@ -17,7 +25,8 @@ public class RemotePlayer extends Player implements BluetoothService.OnMessageRe
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                moveFigure(Move.getMove(bytes, buffer));
+                Move move = Move.getMove(bytes, buffer);
+                moveFigure(move);
             }
         });
     }

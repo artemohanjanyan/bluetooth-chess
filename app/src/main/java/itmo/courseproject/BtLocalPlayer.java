@@ -13,6 +13,7 @@ public class BtLocalPlayer extends LocalPlayer {
 
     @Override
     public boolean moveFigure(Move move) {
+        btService.logMove(move);
         boolean moved = super.moveFigure(move);
         if (moved) {
             btService.write(move.toBytes());

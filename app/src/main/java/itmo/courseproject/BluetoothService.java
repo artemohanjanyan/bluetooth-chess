@@ -18,6 +18,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import itmo.courseproject.chess.Move;
+import itmo.courseproject.chess.Player;
+
 /**
  * Service handling bluetooth interaction
  */
@@ -179,6 +182,29 @@ public class BluetoothService extends Service {
 
     public boolean isServer() {
         return isServer;
+    }
+
+    private ArrayList<Move> moves = new ArrayList<>();
+
+    public void logMove(Move move) {
+        moves.add(move);
+    }
+
+    public void restorePosition(Player white, Player black) {
+        ArrayList<Move> oldMoves = moves;
+        moves = new ArrayList<>();
+        Player tmp;
+        for (int i = 0; i < oldMoves.size(); ++i) {
+            if (white.moveFigure(oldMoves.get(i))) {
+                tmp = white;
+                white = black;
+                black = tmp;
+            }
+        }
+    }
+
+    public boolean shouldRestore() {
+        return moves.size() > 0;
     }
 
     private void showNotification(Class<?> aClass, String string) {

@@ -28,11 +28,14 @@ public class DeviceChooser extends AppCompatActivity {
     private BluetoothService btService;
 
     private static final int REQUEST_ENABLE_DISCOVERABLE = 1;
+    private static final int REQUEST_ENABLE_BT = 2;
 
     private ArrayAdapter<String> arrayAdapter;
 
     private MenuItem progressBar;
     private int devicesFound;
+
+    private boolean shouldStop = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,11 +61,17 @@ public class DeviceChooser extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.device_chooser, menu);
+        progressBar = menu.findItem(R.id.menu_item_progress_bar);
+        return true;
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
-
         if (btService != null) {
-            btService.registerActivity(DeviceChooser.class, getString(R.string.chat_name));
+            btService.registerActivity(DeviceChooser.class, getString(R.string.bt_game));
         }
     }
 
@@ -71,7 +80,23 @@ public class DeviceChooser extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();
 
-            btService.registerActivity(DeviceChooser.class, getString(R.string.chat_name));
+            btService.registerActivity(DeviceChooser.class, getString(R.string.bt_game));
+
+            try {
+                btService.initBtAdapter();
+            } catch (BluetoothService.BtUnavailableException e) {
+                Toast.makeText(DeviceChooser.this,
+                        R.string.bluetooth_absent, Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+
+            if (!btService.getBluetoothAdapter().isEnabled()) {
+                startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE),
+                        REQUEST_ENABLE_BT);
+            } else {
+                initBt();
+            }
 
             btService.setOnConnected(new BluetoothService.OnConnected() {
                 @Override
@@ -79,13 +104,13 @@ public class DeviceChooser extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            DeviceChooser.this.setResult(RESULT_OK);
+                            shouldStop = false;
+                            startActivity(new Intent(DeviceChooser.this, BtGameActivity.class));
                             DeviceChooser.this.finish();
                         }
                     });
                 }
             });
-            initBt();
         }
 
         @Override
@@ -94,17 +119,21 @@ public class DeviceChooser extends AppCompatActivity {
         }
     };
 
-//    @Override
-//    public boolean onPrepareOptionsMenu(Menu menu) {
-//        progressBar = menu.findItem(R.id.menu_item_progress_bar);
-//        return super.onPrepareOptionsMenu(menu);
-//    }
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.device_chooser, menu);
-        progressBar = menu.findItem(R.id.menu_item_progress_bar);
-        return true;
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQUEST_ENABLE_BT:
+                if (resultCode != RESULT_OK) {
+                    Toast.makeText(this,
+                            R.string.bluetooth_request, Toast.LENGTH_LONG).show();
+                    finish();
+                    break;
+                }
+                initBt();
+                break;
+        }
     }
 
     private void initBt() {
@@ -173,7 +202,6 @@ public class DeviceChooser extends AppCompatActivity {
         if (btService != null) {
             btService.unregisterActivity();
         }
-
         super.onStop();
     }
 
@@ -182,11 +210,12 @@ public class DeviceChooser extends AppCompatActivity {
         if (btService.getBluetoothAdapter() != null) {
             btService.getBluetoothAdapter().cancelDiscovery();
         }
-
         unregisterReceiver(broadcastReceiver);
-
         unbindService(connection);
-
+        if (btService != null && shouldStop) {
+            btService.stopSelf();
+            btService = null;
+        }
         super.onDestroy();
     }
 }

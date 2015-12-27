@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.Log;
 
 public class BtGameActivity extends GameActivity {
+    private static final String TAG = "BtGameActivity";
 
     public static final String LOCAL_PLAYER_COLOR = "local_player_color";
 
@@ -25,6 +27,12 @@ public class BtGameActivity extends GameActivity {
             whitePlayer = serverPlayerColor ? remotePlayer : btLocalPlayer;
             blackPlayer = serverPlayerColor ? btLocalPlayer : remotePlayer;
             onPlayersInitialized();
+
+            Log.d(TAG, "restoration...");
+            if (btService.shouldRestore()) {
+                btService.restorePosition(whitePlayer, blackPlayer);
+                Log.d(TAG, "restored!");
+            }
         }
 
         @Override
@@ -35,6 +43,7 @@ public class BtGameActivity extends GameActivity {
 
     @Override
     protected void initPlayers() {
+        Log.d(TAG, "initPlayers");
         Intent btServiceIntent = new Intent(this, BluetoothService.class);
         startService(btServiceIntent);
         bindService(btServiceIntent, connection, Context.BIND_AUTO_CREATE);
@@ -51,17 +60,15 @@ public class BtGameActivity extends GameActivity {
 
     @Override
     protected void onStop() {
+        super.onStop();
         if (btService != null) {
             btService.unregisterActivity();
         }
-
-        super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        unbindService(connection);
-
         super.onDestroy();
+        unbindService(connection);
     }
 }
