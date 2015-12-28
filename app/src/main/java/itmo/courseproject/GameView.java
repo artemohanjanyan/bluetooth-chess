@@ -29,6 +29,8 @@ public class GameView extends View {
 
     private static final int FIGURES_COUNT = Figure.figures.size();
 
+    public static final double DRG_SCALE = 1.5;
+
     public Desk desk;
 
     private Paint whiteFieldPaint, blackFieldPaint, whiteFieldPressedPaint, blackFieldPressedPaint, figurePaint;
@@ -124,6 +126,8 @@ public class GameView extends View {
 
         boardSize = Math.min(width, height);
         fieldSize = boardSize / Desk.SIZE;
+
+        drgRect.set(0, 0, 2 * (int) (DRG_SCALE * fieldSize), 2 * (int) (DRG_SCALE * fieldSize));
 
         int measureSpec = MeasureSpec.makeMeasureSpec(boardSize, MeasureSpec.EXACTLY);
         super.onMeasure(measureSpec, measureSpec);
@@ -231,14 +235,14 @@ public class GameView extends View {
                         Integer.toString(event.getAction()))
         );
 
-        if (x < 0 || y < 0 || x >= boardSize || y >= boardSize)
-            return super.onTouchEvent(event);
-
         int column = localPlayer.getColor() ? Desk.SIZE - x / fieldSize - 1 : x / fieldSize;
         int row = localPlayer.getColor() ?  y / fieldSize : Desk.SIZE - y / fieldSize - 1;
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                if (x < 0 || y < 0 || x >= boardSize || y >= boardSize) {
+                    return false;
+                }
                 if (desk.getFigure(row, column) != null && desk.getFigure(row, column).getColor() == localPlayer.getColor()) {
                     trySelect(row, column);
                 }
@@ -255,8 +259,12 @@ public class GameView extends View {
                 }
                 break;
             case MotionEvent.ACTION_UP:
+                if (x < 0 || y < 0 || x >= boardSize || y >= boardSize) {
+                    dragged = false;
+                    return false;
+                }
                 if (selected) {
-                    boolean moved = localPlayer.moveFigure(new SimpleMove(sRow, sColumn, row, column));
+                    boolean moved = (!desk.hasRedoMoves()) && localPlayer.moveFigure(new SimpleMove(sRow, sColumn, row, column));
                     touchDowned = false;
                     dragged = false;
                     if (moved) {
@@ -273,9 +281,11 @@ public class GameView extends View {
 
     private void trySelect(int row, int column) {
         if (desk.getFigure(row, column) != null) {
-            markerMoves = localPlayer.chooseFigure(row, column);
-            if (!markerMoves.isEmpty()) {
-                moveShown = false;
+            if (!desk.hasRedoMoves()) {
+                markerMoves = localPlayer.chooseFigure(row, column);
+                if (!markerMoves.isEmpty()) {
+                    moveShown = false;
+                }
             }
             selected = true;
             sRow = row;
@@ -294,7 +304,7 @@ public class GameView extends View {
 
 
     private void updateDragPos(int x, int y) {
-        drgRect.offsetTo(x - fieldSize, y - fieldSize);
+        drgRect.offsetTo(x - (int)(DRG_SCALE * fieldSize), y - (int)((1.5 * DRG_SCALE) * fieldSize));
     }
 
     public void showMove(Move move) {
