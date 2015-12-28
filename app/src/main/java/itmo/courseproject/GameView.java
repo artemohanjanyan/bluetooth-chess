@@ -40,7 +40,6 @@ public class GameView extends View {
 
     private boolean selected, dragged, touchDowned;
     private int sRow = -1, sColumn = -1; // selected field position
-    private int dragX, dragY; // dragged figure position
     private boolean moveShown;
     private Move shownMove;
 
@@ -126,9 +125,6 @@ public class GameView extends View {
         boardSize = Math.min(width, height);
         fieldSize = boardSize / Desk.SIZE;
 
-        drgRect.set(0, 0, 2 * fieldSize, 2 * fieldSize);
-        drgRect.offset(dragX - fieldSize, dragY - fieldSize);
-
         int measureSpec = MeasureSpec.makeMeasureSpec(boardSize, MeasureSpec.EXACTLY);
         super.onMeasure(measureSpec, measureSpec);
     }
@@ -207,7 +203,7 @@ public class GameView extends View {
     }
 
     private void drawField(Canvas canvas, int row, int column, Paint paint) {
-        if (localPlayer.getColor()) {
+        if (localPlayer != null && localPlayer.getColor()) {
             row = Desk.SIZE - row - 1;
             column = Desk.SIZE - column - 1;
         }
@@ -302,8 +298,17 @@ public class GameView extends View {
     }
 
     public void showMove(Move move) {
-        markerMoves = null;
         moveShown  = true;
         shownMove = move;
+        invalidate();
+    }
+
+    public void deskStateChanged() {
+        markerMoves = null;
+        selected = false;
+        dragged = false;
+        touchDowned = false;
+        moveShown = false;
+        invalidate();
     }
 }

@@ -17,8 +17,8 @@ public final class Chess extends Game {
     private Point blackKing, whiteKing;
 
     @SuppressWarnings("unchecked")
-    public Chess(Figure[][] d, boolean turn, Player whitePlayer, Player blackPlayer) {
-        super(d, turn, whitePlayer, blackPlayer);
+    public Chess(Desk d, Player whitePlayer, Player blackPlayer) {
+        super(d, whitePlayer, blackPlayer);
 
         for (int i = 0; i < Desk.SIZE; i++) {
             for (int j = 0; j < Desk.SIZE; j++) {

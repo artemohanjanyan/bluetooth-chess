@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import itmo.courseproject.chess.Desk;
 import itmo.courseproject.chess.Move;
 import itmo.courseproject.chess.Player;
 
@@ -37,6 +38,8 @@ public class BluetoothService extends Service {
     private AcceptThread acceptThread;
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
+
+    public Desk desk;
 
     @Override
     public void onDestroy() {
@@ -171,7 +174,7 @@ public class BluetoothService extends Service {
         int newRegCount = regCount + d;
 
         if (newRegCount == 0 && regCount != 0) {
-            showNotification(lastClass, lastString);
+            showNotification(lastClass, lastString, lastString);
         }
         if (newRegCount != 0 && regCount == 0) {
             hideNotification();
@@ -184,36 +187,17 @@ public class BluetoothService extends Service {
         return isServer;
     }
 
-    private ArrayList<Move> moves = new ArrayList<>();
 
-    public void logMove(Move move) {
-        moves.add(move);
-    }
 
-    public void restorePosition(Player white, Player black) {
-        ArrayList<Move> oldMoves = moves;
-        moves = new ArrayList<>();
-        Player tmp;
-        for (int i = 0; i < oldMoves.size(); ++i) {
-            if (white.moveFigure(oldMoves.get(i))) {
-                tmp = white;
-                white = black;
-                black = tmp;
-            }
-        }
-    }
 
-    public boolean shouldRestore() {
-        return moves.size() > 0;
-    }
 
-    private void showNotification(Class<?> aClass, String string) {
+    private void showNotification(Class<?> aClass, String title, String text) {
         Log.d(TAG, "notification shown");
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setContentTitle(string)
-                .setContentText(string)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setSmallIcon(R.drawable.ic_bt_notification)
                 .setContentIntent(PendingIntent.getActivity(this, 0,
                         new Intent(this, aClass).setFlags(
                                 Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP),

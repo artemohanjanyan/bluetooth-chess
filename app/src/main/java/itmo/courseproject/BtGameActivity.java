@@ -28,13 +28,14 @@ public class BtGameActivity extends GameActivity {
             serverPlayerColor = btService.isServer();
             whitePlayer = serverPlayerColor ? remotePlayer : btLocalPlayer;
             blackPlayer = serverPlayerColor ? btLocalPlayer : remotePlayer;
-            onPlayersInitialized();
 
-            Log.d(TAG, "restoration...");
-            if (btService.shouldRestore()) {
-                btService.restorePosition(whitePlayer, blackPlayer);
-                Log.d(TAG, "restored!");
+            if (btService.desk == null) {
+                btService.desk = desk;
+            } else {
+                desk = btService.desk;
             }
+
+            onPlayersInitialized();
         }
 
         @Override

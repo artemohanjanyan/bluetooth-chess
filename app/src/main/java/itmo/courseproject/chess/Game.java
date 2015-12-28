@@ -1,6 +1,8 @@
 package itmo.courseproject.chess;
 
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class Game {
@@ -17,20 +19,26 @@ public abstract class Game {
     public static final int WHITE_PLAYER_WINS = 0;
     public static final int BLACK_PLAYER_WINS = 1;
 
-    final Desk desk;
+    final Desk desk, deskToView;
 
-    Game(Figure[][] d, boolean turn, Player whitePlayer, Player blackPlayer) {
-
+    Game(Desk desk, Player whitePlayer, Player blackPlayer) {
         this.whitePlayer = whitePlayer;
         this.blackPlayer = blackPlayer;
 
-        desk = new Desk(this, d, turn);
+        this.desk = desk;
+        desk.game = this;
 
         whitePlayer.game = this;
         whitePlayer.color = Chess.WHITE;
 
         blackPlayer.game = this;
         blackPlayer.color = Chess.BLACK;
+
+        Figure[][] figuresToView = new Figure[Desk.SIZE][];
+        for (int i = 0; i < Desk.SIZE; i++) {
+            figuresToView[i] = Arrays.copyOf(desk.d[i], Desk.SIZE);
+        }
+        deskToView = new Desk(figuresToView, desk.turn, this);
 
         whitePlayer.onYourTurn();
     }
@@ -55,7 +63,7 @@ public abstract class Game {
 
     abstract List<Move> chooseFigure(Player player, int row, int column);
 
-    synchronized boolean moveFigure(Player player, Move move) {
+    boolean moveFigure(Player player, Move move) {
         if (player != whitePlayer && player != blackPlayer && desk.turn ^ player.color) {
             return false;
         }
@@ -64,7 +72,9 @@ public abstract class Game {
         return true;
     }
 
-    synchronized void onMoveExecution(Player player, Move move) {
+    void onMoveExecution(Player player, Move move) {
+        deskToView.redoAllMoves();
+        deskToView.executeMove(move);
         if (move.terminal) {
             ((player == whitePlayer) ? blackPlayer : whitePlayer).onYourTurn();
         }
@@ -78,7 +88,7 @@ public abstract class Game {
     }
 
     public Desk getDesk() {
-        return desk;
+        return deskToView;
     }
 
     void gameOver(int gameOverMsg) {

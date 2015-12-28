@@ -16,7 +16,6 @@ public class RemotePlayer extends Player implements BluetoothService.OnMessageRe
 
     @Override
     public boolean moveFigure(Move move) {
-        btService.logMove(move);
         return super.moveFigure(move);
     }
 
