@@ -2,18 +2,22 @@ package itmo.courseproject.chess;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Random;
 
 public class Desk {
 
+    public String lastMoveNotation;
+
+
     private class FieldChangesScope {
+        final Move move;
         final List<Point> fields;
         final Figure[] figures;
-        final boolean turnChanged;
 
-        public FieldChangesScope(List<Point> fields, boolean turnChanged) {
-            this.fields = fields;
-            this.turnChanged = turnChanged;
+        public FieldChangesScope(Move move) {
+            this.move = move;
+            this.fields = move.getChangedFields();
             figures = new Figure[fields.size()];
             for (int i = 0; i < fields.size(); i++) {
                 Point field = fields.get(i);
@@ -31,14 +35,14 @@ public class Desk {
                 figures[i] = figure;
                 i++;
             }
-            if (turnChanged) {
+            if (move.terminal) {
                 desk.switchTurn();
             }
         }
     }
 
-    private final LinkedList<FieldChangesScope> undoScopes;
-    private final LinkedList<FieldChangesScope> redoScopes;
+    private final LinkedList<FieldChangesScope> moveScopes;
+    private ListIterator<FieldChangesScope> iterator;
 
     public static final int SIZE = 8;
 
@@ -137,8 +141,8 @@ public class Desk {
         this.d = d;
         this.turn = turn;
 
-        undoScopes = new LinkedList<>();
-        redoScopes = new LinkedList<>();
+        moveScopes = new LinkedList<>();
+        iterator = moveScopes.listIterator();
     }
 
     public Figure getFigure(int row, int column) {
@@ -149,51 +153,76 @@ public class Desk {
         turn = !turn;
     }
 
-    boolean executeMove(Move move) {
-        redoScopes.clear();
-        FieldChangesScope scope = new FieldChangesScope(move.getChangedFields(), move.terminal);
-        undoScopes.add(scope);
+    void executeMove(Move move) {
+        while (iterator.hasNext()) {
+            iterator.next();
+            iterator.remove();
+        }
+
+        FieldChangesScope scope = new FieldChangesScope(move);
+        lastMoveNotation = move.getNotation(this);
+        iterator.add(scope);
         move.execute(this);
         if (move.terminal) {
             switchTurn();
         }
-        return true;
     }
 
     public void undoMove() {
-        moveFieldChangeScope(undoScopes, redoScopes);
+        if (!iterator.hasPrevious()) {
+            return;
+        }
+        iterator.previous().change();
     }
 
     public void redoMove() {
-        moveFieldChangeScope(redoScopes, undoScopes);
+        if (!iterator.hasNext()) {
+            return;
+        }
+        FieldChangesScope scope = iterator.next();
+        lastMoveNotation = scope.move.getNotation(this);
+        scope.change();
     }
 
+
     public boolean hasRedoMoves() {
-        return !redoScopes.isEmpty();
+        return iterator.hasNext();
     }
 
     public boolean hasUndoMoves() {
-        return !undoScopes.isEmpty();
+        return iterator.hasPrevious();
     }
 
     public void redoAllMoves() {
-        while (hasRedoMoves()) {
-            redoMove();
+        while (iterator.hasNext()) {
+            iterator.next().change();
         }
     }
 
     public void undoAllMoves() {
-        while (hasUndoMoves()) {
-            undoMove();
+        while (iterator.hasPrevious()) {
+            iterator.previous().change();
         }
     }
 
-    private static void moveFieldChangeScope(LinkedList<FieldChangesScope> from, LinkedList<FieldChangesScope> to) {
-        if (from.isEmpty()) {
+    public void gotoMove(int i) {
+        if (i == iterator.previousIndex()) {
             return;
         }
-        FieldChangesScope scope = from.remove(from.size() - 1);
-        scope.change();
-        to.add(scope);
+        if (i < iterator.previousIndex()) {
+            while(iterator.previousIndex() != i) {
+                iterator.previous().change();
+            }
+        } else {
+            while (iterator.previousIndex() != i) {
+                iterator.next().change();
+            }
+        }
     }
+
+
+    public int getMoveCount() {
+        return moveScopes.size();
+    }
+    public int getCurrentIndex() { return iterator.previousIndex(); }
 }

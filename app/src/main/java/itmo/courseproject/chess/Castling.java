@@ -54,4 +54,9 @@ public final class Castling extends Move {
         ret.add(new Point(endRow, endColumn + (startColumn > startRookColumn ? 1 : -1)));
         return ret;
     }
+
+    @Override
+    public String getNotation(Desk desk) {
+        return startColumn < startRookColumn ? "O-O" : "O-O-O";
+    }
 }

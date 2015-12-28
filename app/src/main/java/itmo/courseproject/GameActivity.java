@@ -2,12 +2,14 @@ package itmo.courseproject;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -24,6 +26,7 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
 
     protected GameView gameView;
     protected TextView gameOverText;
+    protected LinearLayout moveLogView;
 
     protected ImageButton undoAllMovesButton, undoMoveButton, redoMoveButton, redoAllMovesButton;
 
@@ -48,6 +51,8 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
     protected abstract void initPlayers();
 
     protected Desk desk;
+    protected Resources res;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +69,7 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
         undoMoveButton = (ImageButton) findViewById(R.id.undo_move_button);
         redoMoveButton = (ImageButton) findViewById(R.id.redo_move_button);
 
-        Resources res = getResources();
+        res = getResources();
         redoMoveDrawable = res.getDrawable(R.drawable.ic_redo_move);
         undoMoveDrawable = res.getDrawable(R.drawable.ic_undo_move);
         redoMoveDisabledDrawable = res.getDrawable(R.drawable.ic_redo_move_disabled);
@@ -78,6 +83,7 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
 
         gameView = (GameView) findViewById(R.id.chess);
         gameOverText = (TextView) findViewById(R.id.game_over_text);
+        moveLogView = (LinearLayout) findViewById(R.id.move_log_view);
 
         switch (gameId) {
             case CHESS_CLASSIC:
@@ -123,11 +129,13 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
             }
         });
 
-        updateViewsState();
+
+
         initPlayers();
     }
 
     public void updateViewsState() {
+        resetSelectedTextView((TextView) moveLogView.getChildAt(desk.getCurrentIndex()));
         setUndoEnabled(desk.hasUndoMoves());
         setRedoEnabled(desk.hasRedoMoves());
         gameView.deskStateChanged();
@@ -157,11 +165,53 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
 
     @Override
     public void onMoveExecuted(Move move) {
+        addMoveLogTextView(desk.getCurrentIndex());
         updateViewsState();
         gameView.showMove(move);
     }
 
+    protected class MoveLogTextViewOnClickListener implements View.OnClickListener {
+
+        private MoveLogTextViewOnClickListener() {
+        }
+
+        @Override
+        public void onClick(View v) {
+            int index = moveLogView.indexOfChild(v);
+            desk.gotoMove(index);
+            updateViewsState();
+        }
+    }
+
+    private TextView selected;
+
+    protected void resetSelectedTextView(TextView v) {
+        if (selected != null){
+            selected.setBackgroundDrawable(null);
+        }
+        if (v != null) {
+            v.setBackgroundColor(res.getColor(R.color.colorAccent));
+        }
+        selected = v;
+    }
+
+    protected MoveLogTextViewOnClickListener moveLogTextViewOnClickListener = new MoveLogTextViewOnClickListener();
+
+    private void addMoveLogTextView(int i) {
+        TextView textView = (TextView) getLayoutInflater().inflate(R.layout.move_notation, null);
+        textView.setText(((i % 2 == 0) ? Integer.toString(i / 2 + 1) + ". " : "") + desk.lastMoveNotation);
+        textView.setOnClickListener(moveLogTextViewOnClickListener);
+        moveLogView.addView(textView);
+    }
+
     protected void onPlayersInitialized() {
+        desk.undoAllMoves();
+        while (desk.hasRedoMoves()) {
+            desk.redoMove();
+            addMoveLogTextView(desk.getCurrentIndex());
+            moveLogView.addView(new TextView(this));
+        }
+        updateViewsState();
         game = new Chess(desk, whitePlayer, blackPlayer);
 
         game.setListener(this);

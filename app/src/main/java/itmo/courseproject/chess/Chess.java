@@ -237,7 +237,7 @@ public final class Chess extends Game {
         if (!hasMoves) {
             desk.executeMove(Move.EMPTY_MOVE);
             checkNonTarget();
-            desk.redoMove();
+            desk.undoMove();
             if (isCorrect) {
                 return DRAW;
             }

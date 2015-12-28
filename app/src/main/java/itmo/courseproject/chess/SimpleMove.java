@@ -47,4 +47,20 @@ public class SimpleMove extends Move {
                 (endFigure == null) ? -1 : endFigure.getID()
         };
     }
+
+    @Override
+    public String getNotation(Desk desk) {
+        StringBuilder str = new StringBuilder();
+        str.append(desk.d[startRow][startColumn]);
+        str.append((char)('a' + startColumn));
+        str.append((char)('1' + startRow));
+        str.append('-');
+        str.append((char)('a' + endColumn));
+        str.append((char)('1' + endRow));
+        if (endFigure != null) {
+            str.append('=');
+            str.append(endFigure);
+        }
+        return str.toString();
+    }
 }

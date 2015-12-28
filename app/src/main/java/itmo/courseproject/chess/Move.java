@@ -27,6 +27,11 @@ public abstract class Move {
         public byte[] toBytes() {
             return new byte[0];
         }
+
+        @Override
+        public String getNotation(Desk desk) {
+            return "";
+        }
     }
 
     public static final Move EMPTY_MOVE = new EmptyMove();
@@ -89,4 +94,5 @@ public abstract class Move {
         return factoryMap.get(buffer[0]).create(Arrays.copyOfRange(buffer, 1, bytes));
     }
 
+    public abstract String getNotation(Desk desk);
 }

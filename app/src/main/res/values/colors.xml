@@ -6,7 +6,7 @@
 
     <color name="whiteField">#FFFFFF</color>
     <color name="blackField">@color/colorPrimary</color>
-    <color name="whiteFieldPressed">#E8B0B0</color>
+    <color name="whiteFieldPressed">#FFD0D0</color>
     <color name="blackFieldPressed">#E0A0A0</color>
 
 </resources>
