@@ -15,7 +15,7 @@ public class BtGameActivity extends GameActivity {
 
     public static final String LOCAL_PLAYER_COLOR = "local_player_color";
 
-    private boolean serverPlayerColor;
+    private boolean localPlayerColor;
     private BluetoothService btService;
     private BluetoothService.MessageChannel channel;
 
@@ -29,9 +29,8 @@ public class BtGameActivity extends GameActivity {
 
             BtLocalPlayer btLocalPlayer = new BtLocalPlayer(gameView, channel);
             BtRemotePlayer btRemotePlayer = new BtRemotePlayer(channel, BtGameActivity.this);
-            serverPlayerColor = btService.isServer();
-            whitePlayer = serverPlayerColor ? btRemotePlayer : btLocalPlayer;
-            blackPlayer = serverPlayerColor ? btLocalPlayer : btRemotePlayer;
+            whitePlayer = localPlayerColor ? btRemotePlayer : btLocalPlayer;
+            blackPlayer = localPlayerColor ? btLocalPlayer : btRemotePlayer;
 
             if (btService.desk == null) {
                 btService.desk = desk;
@@ -67,6 +66,7 @@ public class BtGameActivity extends GameActivity {
     @Override
     protected void initPlayers() {
         Log.d(TAG, "initPlayers");
+        localPlayerColor = initialIntent.getBooleanExtra(LOCAL_PLAYER_COLOR, desk.getTurn());
         Intent btServiceIntent = new Intent(this, BluetoothService.class);
         startService(btServiceIntent);
         bindService(btServiceIntent, connection, Context.BIND_AUTO_CREATE);

@@ -46,8 +46,6 @@ public class Desk {
 
     public static final int SIZE = 8;
 
-    private static final Random rnd = new Random();
-
     public static Desk getClassicStartPosition() {
         return new Desk(new Figure[][]{
                 new Figure[]{Figure.WHITE_ROOK, Figure.WHITE_KNIGHT, Figure.WHITE_BISHOP, Figure.WHITE_QUEEN, Figure.WHITE_KING, Figure.WHITE_BISHOP, Figure.WHITE_KNIGHT, Figure.WHITE_ROOK},
@@ -62,7 +60,9 @@ public class Desk {
                 Chess.WHITE);
     }
 
-    public static Desk getRandomFisherStartPosition() {
+    public static Desk getRandomFisherStartPosition(long seed) {
+        Random rnd = new Random(seed);
+
         Figure[][] d = new Figure[SIZE][SIZE];
         for (int i = 0; i < SIZE; i++) {
             d[1][i] = Figure.WHITE_PAWN;
@@ -147,6 +147,10 @@ public class Desk {
 
     public Figure getFigure(int row, int column) {
         return d[row][column];
+    }
+
+    public boolean getTurn() {
+        return turn;
     }
 
     private void switchTurn() {

@@ -2,7 +2,6 @@ package itmo.courseproject;
 
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -46,6 +45,9 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
     static final int CHESS_TEST = -1;
     static final String GAME = "game";
 
+    static final String SEED = "seed";
+
+
     protected Intent initialIntent;
 
     protected abstract void initPlayers();
@@ -61,6 +63,7 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
 
         initialIntent = getIntent();
         int gameId = initialIntent.getIntExtra(GAME, CHESS_CLASSIC);
+        long seed = initialIntent.getLongExtra(SEED, 1);
         setContentView(R.layout.activity_chess_view);
 
         undoAllMovesButton = (ImageButton) findViewById(R.id.undo_all_moves_button);
@@ -90,7 +93,7 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
                 desk = Desk.getClassicStartPosition();
                 break;
             case CHESS_960:
-                desk = Desk.getRandomFisherStartPosition();
+                desk = Desk.getRandomFisherStartPosition(seed);
                 break;
             case CHESS_TEST:
                 desk = Desk.getTestPosition();
