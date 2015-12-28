@@ -3,15 +3,13 @@ package itmo.courseproject;
 import itmo.courseproject.chess.Move;
 import itmo.courseproject.chess.Player;
 
-public class RemotePlayer extends Player implements BluetoothService.OnMessageReceivedListener {
+public class BtRemotePlayer extends Player implements BluetoothService.OnMessageReceivedListener {
 
     private final BtGameActivity activity;
-    private final BluetoothService btService;
 
-    public RemotePlayer(BluetoothService btService, BtGameActivity activity) {
+    public BtRemotePlayer(BluetoothService.MessageChannel channel, BtGameActivity activity) {
         this.activity = activity;
-        this.btService = btService;
-        btService.setOnMessageReceivedListener(this);
+        channel.setOnMessageReceivedListener(this);
     }
 
     @Override
@@ -20,11 +18,11 @@ public class RemotePlayer extends Player implements BluetoothService.OnMessageRe
     }
 
     @Override
-    public void process(final int bytes, final byte[] buffer) {
+    public void process(final byte[] buffer) {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Move move = Move.getMove(bytes, buffer);
+                Move move = Move.getMove(buffer);
                 moveFigure(move);
             }
         });

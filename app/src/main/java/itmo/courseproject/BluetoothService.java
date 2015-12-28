@@ -16,11 +16,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 import itmo.courseproject.chess.Desk;
-import itmo.courseproject.chess.Move;
-import itmo.courseproject.chess.Player;
 
 /**
  * Service handling bluetooth interaction
@@ -40,6 +39,15 @@ public class BluetoothService extends Service {
     private ConnectedThread connectedThread;
 
     public Desk desk;
+
+    @Override
+    public void onCreate() {
+        for (int i = 0; i < byteSize; ++i) {
+            cache[i] = new ArrayList<>();
+        }
+
+        super.onCreate();
+    }
 
     @Override
     public void onDestroy() {
@@ -124,28 +132,6 @@ public class BluetoothService extends Service {
         connectThread.start();
     }
 
-    public interface OnMessageReceivedListener {
-        void process(int bytes, byte[] buffer);
-    }
-
-    private OnMessageReceivedListener onMessageReceivedListener;
-    private final ArrayList<Integer> sizes = new ArrayList<>();
-    private final ArrayList<byte[]> cache = new ArrayList<>();
-
-    public void setOnMessageReceivedListener(OnMessageReceivedListener onMessageReceivedListener) {
-        this.onMessageReceivedListener = onMessageReceivedListener;
-
-        for (int i = 0; i < cache.size(); ++i) {
-            onMessageReceivedListener.process(sizes.get(i), cache.get(i));
-        }
-        cache.clear();
-        sizes.clear();
-    }
-
-    public void write(byte[] bytes) {
-        connectedThread.write(bytes);
-    }
-
     public BluetoothSocket getBluetoothSocket() {
         return btSocket;
     }
@@ -189,6 +175,63 @@ public class BluetoothService extends Service {
     }
 
 
+
+    public interface OnMessageReceivedListener {
+        void process(byte[] buffer);
+    }
+
+    private final int byteSize = 256;
+
+    @SuppressWarnings("unchecked")
+    private ArrayList<byte[]>[] cache = new ArrayList[byteSize];
+
+    public class MessageChannel {
+        private byte id;
+        private OnMessageReceivedListener onMessageReceivedListener;
+
+        public MessageChannel(byte id) {
+            this.id = id;
+        }
+
+        public void setOnMessageReceivedListener(OnMessageReceivedListener onMessageReceivedListener) {
+            this.onMessageReceivedListener = onMessageReceivedListener;
+
+            for (int i = 0; i < cache[id].size(); ++i) {
+                onMessageReceivedListener.process(cache[id].get(i));
+            }
+            cache[id].clear();
+        }
+
+        public void send(byte[] bytes) {
+            //noinspection SynchronizeOnNonFinalField
+            synchronized (connectedThread) {
+                byte[] buffer = new byte[bytes.length + 1];
+                buffer[0] = id;
+                System.arraycopy(bytes, 0, buffer, 1, bytes.length);
+                connectedThread.write(buffer);
+            }
+        }
+    }
+
+    MessageChannel[] channels = new MessageChannel[256];
+
+    public MessageChannel getChannel(byte id) {
+        MessageChannel channel = new MessageChannel(id);
+        channels[id] = channel;
+        return channel;
+    }
+
+    public void unregisterChannel(int id) {
+        channels[id] = null;
+    }
+
+    private void process(int id, byte[] message) {
+        if (channels[id] != null) {
+            channels[id].onMessageReceivedListener.process(message);
+        } else {
+            cache[id].add(message);
+        }
+    }
 
 
 
@@ -340,19 +383,24 @@ public class BluetoothService extends Service {
                 try {
                     bytes = inputStream.read(buffer);
                     Log.d(TAG, "read");
-                    try {
-                        onMessageReceivedListener.process(bytes, buffer);
-                    } catch (NullPointerException ignored) {
-                        sizes.add(bytes);
-                        cache.add(buffer);
-                    }
+                    byte id = buffer[0];
+                    byte[] msg = Arrays.copyOfRange(buffer, 1, bytes);
+                    process(id, msg);
                 } catch (IOException e) {
                     break;
                 }
             }
         }
 
-        public synchronized void write(byte[] bytes) {
+        private void write(byte singleByte) {
+            try {
+                outputStream.write(singleByte);
+                Log.d(TAG, "write");
+            } catch (IOException ignored) {
+            }
+        }
+
+        private void write(byte[] bytes) {
             try {
                 outputStream.write(bytes);
                 Log.d(TAG, "write");

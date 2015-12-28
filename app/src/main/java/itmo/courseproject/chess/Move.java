@@ -90,8 +90,8 @@ public abstract class Move {
     }
 
 
-    public static Move getMove(int bytes, byte[] buffer) {
-        return factoryMap.get(buffer[0]).create(Arrays.copyOfRange(buffer, 1, bytes));
+    public static Move getMove(byte[] buffer) {
+        return factoryMap.get(buffer[0]).create(Arrays.copyOfRange(buffer, 1, buffer.length));
     }
 
     public abstract String getNotation(Desk desk);

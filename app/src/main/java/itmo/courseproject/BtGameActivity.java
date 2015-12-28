@@ -11,11 +11,13 @@ import android.view.MenuItem;
 
 public class BtGameActivity extends GameActivity {
     private static final String TAG = "BtGameActivity";
+    private static final byte CHANNEL_ID = 1;
 
     public static final String LOCAL_PLAYER_COLOR = "local_player_color";
 
     private boolean serverPlayerColor;
     private BluetoothService btService;
+    private BluetoothService.MessageChannel channel;
 
     private final ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -23,11 +25,13 @@ public class BtGameActivity extends GameActivity {
             btService = ((BluetoothService.BtBinder) service).getService();
             btService.registerActivity(BtGameActivity.class);
 
-            BtLocalPlayer btLocalPlayer = new BtLocalPlayer(gameView, btService);
-            RemotePlayer remotePlayer = new RemotePlayer(btService, BtGameActivity.this);
+            channel = btService.getChannel(CHANNEL_ID);
+
+            BtLocalPlayer btLocalPlayer = new BtLocalPlayer(gameView, channel);
+            BtRemotePlayer btRemotePlayer = new BtRemotePlayer(channel, BtGameActivity.this);
             serverPlayerColor = btService.isServer();
-            whitePlayer = serverPlayerColor ? remotePlayer : btLocalPlayer;
-            blackPlayer = serverPlayerColor ? btLocalPlayer : remotePlayer;
+            whitePlayer = serverPlayerColor ? btRemotePlayer : btLocalPlayer;
+            blackPlayer = serverPlayerColor ? btLocalPlayer : btRemotePlayer;
 
             if (btService.desk == null) {
                 btService.desk = desk;
@@ -88,6 +92,9 @@ public class BtGameActivity extends GameActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (btService != null) {
+            btService.unregisterChannel(CHANNEL_ID);
+        }
         unbindService(connection);
     }
 }

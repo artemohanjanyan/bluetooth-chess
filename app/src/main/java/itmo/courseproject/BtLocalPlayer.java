@@ -4,18 +4,18 @@ import itmo.courseproject.chess.Move;
 
 public class BtLocalPlayer extends LocalPlayer {
 
-    private final BluetoothService btService;
+    private final BluetoothService.MessageChannel channel;
 
-    public BtLocalPlayer(GameView gameView, BluetoothService btService) {
+    public BtLocalPlayer(GameView gameView, BluetoothService.MessageChannel channel) {
         super(gameView);
-        this.btService = btService;
+        this.channel = channel;
     }
 
     @Override
     public boolean moveFigure(Move move) {
         boolean moved = super.moveFigure(move);
         if (moved) {
-            btService.write(move.toBytes());
+            channel.send(move.toBytes());
         }
         return moved;
     }
