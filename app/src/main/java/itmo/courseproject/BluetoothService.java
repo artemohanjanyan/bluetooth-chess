@@ -153,9 +153,8 @@ public class BluetoothService extends Service {
     /*
         Called to indicate that activity is in foreground and notification is unnecessary
      */
-    public void registerActivity(Class<?> activityClass, String string) {
+    public void registerActivity(Class<?> activityClass) {
         lastClass = activityClass;
-        lastString = string;
         changeRegCount(1);
     }
 
@@ -168,13 +167,15 @@ public class BluetoothService extends Service {
 
     private int regCount = 0;
     private Class<?> lastClass;
-    private String lastString;
 
     private synchronized void changeRegCount(int d) {
         int newRegCount = regCount + d;
 
         if (newRegCount == 0 && regCount != 0) {
-            showNotification(lastClass, lastString, lastString);
+            showNotification(lastClass, getString(R.string.bt_game),
+                    isConnected() ?
+                            getBluetoothSocket().getRemoteDevice().getName() :
+                            getString(R.string.not_connected));
         }
         if (newRegCount != 0 && regCount == 0) {
             hideNotification();
@@ -351,7 +352,7 @@ public class BluetoothService extends Service {
             }
         }
 
-        public void write(byte[] bytes) {
+        public synchronized void write(byte[] bytes) {
             try {
                 outputStream.write(bytes);
                 Log.d(TAG, "write");

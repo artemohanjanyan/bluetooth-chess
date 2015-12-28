@@ -14,6 +14,7 @@
     <string name="scanning_for_devices">Scanning…</string>
     <string name="n_devices_found_suffix">devices found</string>
     <string name="enable_discoverable">Make discoverable</string>
+    <string name="not_connected">Not connected</string>
 
     <!-- Chat -->
     <string name="send">Send</string>

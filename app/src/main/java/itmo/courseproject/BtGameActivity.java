@@ -21,7 +21,7 @@ public class BtGameActivity extends GameActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();
-            btService.registerActivity(BtGameActivity.class, getString(R.string.chat_name));
+            btService.registerActivity(BtGameActivity.class);
 
             BtLocalPlayer btLocalPlayer = new BtLocalPlayer(gameView, btService);
             RemotePlayer remotePlayer = new RemotePlayer(btService, BtGameActivity.this);
@@ -73,7 +73,7 @@ public class BtGameActivity extends GameActivity {
         super.onStart();
 
         if (btService != null) {
-            btService.registerActivity(this.getClass(), getString(R.string.chat_name));
+            btService.registerActivity(this.getClass());
         }
     }
 

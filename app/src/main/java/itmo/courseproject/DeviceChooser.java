@@ -71,7 +71,7 @@ public class DeviceChooser extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if (btService != null) {
-            btService.registerActivity(DeviceChooser.class, getString(R.string.bt_game));
+            btService.registerActivity(DeviceChooser.class);
         }
     }
 
@@ -80,7 +80,7 @@ public class DeviceChooser extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();
 
-            btService.registerActivity(DeviceChooser.class, getString(R.string.bt_game));
+            btService.registerActivity(DeviceChooser.class);
 
             try {
                 btService.initBtAdapter();
