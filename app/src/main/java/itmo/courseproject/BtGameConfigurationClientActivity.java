@@ -5,41 +5,57 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class BtGameActivity extends GameActivity {
-    private static final String TAG = "BtGameActivity";
-    private static final byte CHANNEL_ID = 1;
+public class BtGameConfigurationClientActivity extends AppCompatActivity {
 
-    public static final String LOCAL_PLAYER_COLOR = "local_player_color";
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_game_configuration_client);
+    }
 
-    private boolean serverPlayerColor;
+    private static final byte CHANNEL_ID = 2;
+
     private BluetoothService btService;
-    private BluetoothService.MessageChannel channel;
+
+    private BluetoothService.MessageChannel messageChannel;
+
+    private static long fromByteArray(byte[] array) {
+        long result = 0;
+        for (int i = 0; i < 8; ++i) {
+            result |= array[i];
+            result <<= 8;
+        }
+        return result;
+    }
 
     private final ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             btService = ((BluetoothService.BtBinder) service).getService();
-            btService.registerActivity(BtGameActivity.class);
+            btService.registerActivity(BtGameConfigurationActivity.class);
 
-            channel = btService.getChannel(CHANNEL_ID);
+            messageChannel = btService.getChannel(CHANNEL_ID);
 
-            BtLocalPlayer btLocalPlayer = new BtLocalPlayer(gameView, channel);
-            BtRemotePlayer btRemotePlayer = new BtRemotePlayer(channel, BtGameActivity.this);
-            serverPlayerColor = btService.isServer();
-            whitePlayer = serverPlayerColor ? btRemotePlayer : btLocalPlayer;
-            blackPlayer = serverPlayerColor ? btLocalPlayer : btRemotePlayer;
+            messageChannel.setOnMessageReceivedListener(new BluetoothService.OnMessageReceivedListener() {
+                @Override
+                public void process(final byte[] buffer) {
+                    BtGameConfigurationClientActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            long seed = fromByteArray(buffer);
+                            byte color = buffer[8];
+                            byte type = buffer[9];
 
-            if (btService.desk == null) {
-                btService.desk = desk;
-            } else {
-                desk = btService.desk;
-            }
-
-            onPlayersInitialized();
+                            // TODO Launch game
+                        }
+                    });
+                }
+            });
         }
 
         @Override
@@ -65,19 +81,10 @@ public class BtGameActivity extends GameActivity {
     }
 
     @Override
-    protected void initPlayers() {
-        Log.d(TAG, "initPlayers");
-        Intent btServiceIntent = new Intent(this, BluetoothService.class);
-        startService(btServiceIntent);
-        bindService(btServiceIntent, connection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
     protected void onStart() {
         super.onStart();
-
         if (btService != null) {
-            btService.registerActivity(this.getClass());
+            btService.registerActivity(BtGameConfigurationActivity.class);
         }
     }
 
@@ -94,6 +101,7 @@ public class BtGameActivity extends GameActivity {
         if (btService != null) {
             btService.unregisterChannel(CHANNEL_ID);
         }
+        btService = null;
         unbindService(connection);
         super.onDestroy();
     }

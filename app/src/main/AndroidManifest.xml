@@ -11,17 +11,18 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <activity android:name=".LocalGameActivity"
-            android:screenOrientation="portrait"/>
-
-        <activity android:name=".DeviceChooser"
-            android:screenOrientation="portrait"/>
-
-        <activity android:name=".BtGameActivity"
-            android:screenOrientation="portrait"/>
-
-        <activity android:name=".MenuActivity"
+        <activity
+            android:name=".LocalGameActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".DeviceChooser"
+            android:label="@string/device_chooser_header"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".BtGameActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MenuActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,6 +33,13 @@
         </activity>
 
         <service android:name=".BluetoothService" />
+
+        <activity android:name=".LocalGameConfigurationActivity"
+            android:label="@string/game_configuration_header" />
+        <activity android:name=".BtGameConfigurationActivity"
+            android:label="@string/game_configuration_header" />
+        <activity android:name=".BtGameConfigurationClientActivity"
+            android:label="@string/game_configuration_header" />
     </application>
 
 </manifest>

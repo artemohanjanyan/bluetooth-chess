@@ -10,11 +10,25 @@
     <string name="bluetooth_request">Enabled bluetooth required</string>
 
     <!-- Device chooser -->
+    <string name="device_chooser_header">Device list</string>
     <string name="scan_for_devices">Scan for devices</string>
     <string name="scanning_for_devices">Scanning…</string>
     <string name="n_devices_found_suffix">devices found</string>
     <string name="enable_discoverable">Make discoverable</string>
     <string name="not_connected">Not connected</string>
+
+    <!-- Game configuration -->
+    <string name="game_configuration_header">Game configuration</string>
+    <string name="game_type">Type</string>
+    <string name="type_classic">Classic</string>
+    <string name="type_fisher">Chess 960</string>
+    <string name="game_color">Color</string>
+    <string name="color_white">White</string>
+    <string name="color_black">Black</string>
+    <string name="color_random">Random</string>
+    <string name="accept">Accept</string>
+
+    <string name="wait_for_server">Waiting for server to configure game…</string>
 
     <!-- Chat -->
     <string name="send">Send</string>
