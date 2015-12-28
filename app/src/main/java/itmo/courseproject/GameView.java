@@ -126,6 +126,7 @@ public class GameView extends View {
 
         boardSize = Math.min(width, height);
         fieldSize = boardSize / Desk.SIZE;
+        boardSize = fieldSize * Desk.SIZE;
 
         drgRect.set(0, 0, 2 * (int) (DRG_SCALE * fieldSize), 2 * (int) (DRG_SCALE * fieldSize));
 
