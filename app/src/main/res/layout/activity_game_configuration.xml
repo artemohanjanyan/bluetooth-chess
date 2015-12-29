@@ -41,46 +41,55 @@
             android:onClick="onTypeSelected"/>
     </RadioGroup>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"/>
-
     <LinearLayout
+        android:id="@+id/non_local"
         android:layout_width="match_parent"
-        android:layout_height="48dp">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@color/colorPrimary"
-            android:text="@string/game_color"
-            android:layout_gravity="center"/>
-    </LinearLayout>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-    <RadioGroup
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp">
-        <RadioButton
-            android:id="@+id/color_random"
-            android:layout_width="wrap_content"
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider"/>
+
+        <LinearLayout
+            android:paddingTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="48dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/colorPrimary"
+                android:text="@string/game_color"
+                android:layout_gravity="center"/>
+        </LinearLayout>
+
+        <RadioGroup
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/color_random"
-            android:onClick="onColorSelected"
-            android:checked="true"/>
-        <RadioButton
-            android:id="@+id/color_white"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onColorSelected"
-            android:text="@string/color_white"/>
-        <RadioButton
-            android:id="@+id/color_black"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onColorSelected"
-            android:text="@string/color_black"/>
-    </RadioGroup>
+            android:paddingBottom="8dp">
+            <RadioButton
+                android:id="@+id/color_random"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/color_random"
+                android:onClick="onColorSelected"
+                android:checked="true"/>
+            <RadioButton
+                android:id="@+id/color_white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onColorSelected"
+                android:text="@string/color_white"/>
+            <RadioButton
+                android:id="@+id/color_black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onColorSelected"
+                android:text="@string/color_black"/>
+        </RadioGroup>
+    </LinearLayout>
 
 </LinearLayout>

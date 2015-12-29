@@ -105,7 +105,13 @@ public class DeviceChooser extends AppCompatActivity {
                         @Override
                         public void run() {
                             shouldStop = false;
-                            startActivity(new Intent(DeviceChooser.this, BtGameActivity.class));
+                            if (btService.isServer()) {
+                                startActivity(new Intent(DeviceChooser.this,
+                                        BtGameConfigurationActivity.class));
+                            } else {
+                                startActivity(new Intent(DeviceChooser.this,
+                                        BtGameConfigurationClientActivity.class));
+                            }
                             DeviceChooser.this.finish();
                         }
                     });
@@ -211,11 +217,11 @@ public class DeviceChooser extends AppCompatActivity {
             btService.getBluetoothAdapter().cancelDiscovery();
         }
         unregisterReceiver(broadcastReceiver);
-        unbindService(connection);
         if (btService != null && shouldStop) {
             btService.stopSelf();
             btService = null;
         }
+        unbindService(connection);
         super.onDestroy();
     }
 }

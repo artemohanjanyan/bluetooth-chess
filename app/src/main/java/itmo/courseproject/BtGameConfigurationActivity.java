@@ -6,18 +6,23 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.nio.ByteBuffer;
 import java.util.Random;
 
 public class BtGameConfigurationActivity extends GameConfigurationActivity {
+
     private static final byte CHANNEL_ID = 2;
 
     private BluetoothService btService;
     private MenuItem acceptButton;
 
     private BluetoothService.MessageChannel messageChannel;
+
+    private boolean shouldStop = true;
 
     private final ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -27,7 +32,9 @@ public class BtGameConfigurationActivity extends GameConfigurationActivity {
 
             messageChannel = btService.getChannel(CHANNEL_ID);
 
-            acceptButton.setEnabled(true);
+            if (acceptButton != null) {
+                acceptButton.setEnabled(true);
+            }
         }
 
         @Override
@@ -49,7 +56,9 @@ public class BtGameConfigurationActivity extends GameConfigurationActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean result = super.onCreateOptionsMenu(menu);
         acceptButton = menu.findItem(R.id.accept_button);
-        acceptButton.setEnabled(false);
+        if (btService == null) {
+            acceptButton.setEnabled(false);
+        }
         return result;
     }
 
@@ -71,25 +80,39 @@ public class BtGameConfigurationActivity extends GameConfigurationActivity {
 
     @Override
     protected void onDestroy() {
-        btService = null;
+        if (btService != null) {
+            btService.unregisterChannel(CHANNEL_ID);
+        }
+        if (btService != null && shouldStop) {
+            btService.stopSelf();
+        }
         unbindService(connection);
         super.onDestroy();
     }
 
+    // Because I can
     private static byte[] toByteArray(long x) {
         byte[] array = new byte[8];
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 7; i >= 0; --i) {
             array[i] = (byte) (x & 0xFF);
-            x >>= 8;
+            x >>>= 8;
         }
         return array;
     }
 
+//    public byte[] toByteArray(long x) {
+//        ByteBuffer buffer = ByteBuffer.allocate(8);
+//        buffer.putLong(x);
+//        return buffer.array();
+//    }
+
     @Override
     protected void launchGame() {
-        byte[] seed = toByteArray(System.currentTimeMillis());
+        Random random = new Random();
+
+        long longSeed = random.nextLong();
+        byte[] seed = toByteArray(longSeed);
         if (color == COLOR_RANDOM) {
-            Random random = new Random();
             color = random.nextInt() % 2 + 1;
         }
 
@@ -100,10 +123,14 @@ public class BtGameConfigurationActivity extends GameConfigurationActivity {
 
         messageChannel.send(msg);
 
-        // TODO start activity
+        Log.d(TAG, Long.toString(longSeed));
 
-        btService.unregisterActivity();
-        btService = null;
-        unbindService(connection);
+        Intent intent = new Intent(this, BtGameActivity.class)
+                .putExtra(GameActivity.SEED, longSeed)
+                .putExtra(GameActivity.GAME, type)
+                .putExtra(BtGameActivity.LOCAL_PLAYER_COLOR, color != COLOR_WHITE);
+        startActivity(intent);
+        shouldStop = false;
+        finish();
     }
 }

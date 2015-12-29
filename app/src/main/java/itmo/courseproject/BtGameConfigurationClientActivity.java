@@ -7,15 +7,27 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 public class BtGameConfigurationClientActivity extends AppCompatActivity {
+
+    private static final String TAG = "ConfigurationClient";
+
+    private boolean shouldStop = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_configuration_client);
+
+        Intent btServiceIntent = new Intent(this, BluetoothService.class);
+        startService(btServiceIntent);
+        bindService(btServiceIntent, connection, Context.BIND_AUTO_CREATE);
     }
 
     private static final byte CHANNEL_ID = 2;
@@ -24,14 +36,22 @@ public class BtGameConfigurationClientActivity extends AppCompatActivity {
 
     private BluetoothService.MessageChannel messageChannel;
 
+    // Because I can
     private static long fromByteArray(byte[] array) {
         long result = 0;
         for (int i = 0; i < 8; ++i) {
-            result |= array[i];
             result <<= 8;
+            result |= (array[i] & 0xFF);
         }
         return result;
     }
+
+//    public long fromByteArray(byte[] bytes) {
+//        ByteBuffer buffer = ByteBuffer.allocate(8);
+//        buffer.put(bytes);
+//        buffer.flip();
+//        return buffer.getLong();
+//    }
 
     private final ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -47,11 +67,21 @@ public class BtGameConfigurationClientActivity extends AppCompatActivity {
                     BtGameConfigurationClientActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            long seed = fromByteArray(buffer);
+                            long seed = fromByteArray(Arrays.copyOfRange(buffer, 0, 8));
                             byte color = buffer[8];
                             byte type = buffer[9];
 
-                            // TODO Launch game
+                            Log.d(TAG, Long.toString(seed));
+
+                            Intent intent = new Intent(BtGameConfigurationClientActivity.this,
+                                    BtGameActivity.class)
+                                    .putExtra(GameActivity.SEED, seed)
+                                    .putExtra(GameActivity.GAME, (int) type)
+                                    .putExtra(BtGameActivity.LOCAL_PLAYER_COLOR,
+                                            color == GameConfigurationActivity.COLOR_WHITE);
+                            startActivity(intent);
+                            shouldStop = false;
+                            finish();
                         }
                     });
                 }
@@ -101,7 +131,9 @@ public class BtGameConfigurationClientActivity extends AppCompatActivity {
         if (btService != null) {
             btService.unregisterChannel(CHANNEL_ID);
         }
-        btService = null;
+        if (btService != null && shouldStop) {
+            btService.stopSelf();
+        }
         unbindService(connection);
         super.onDestroy();
     }

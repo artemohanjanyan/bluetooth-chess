@@ -9,9 +9,11 @@ import android.widget.RadioButton;
 
 public abstract class GameConfigurationActivity extends AppCompatActivity {
 
-    protected static final int COLOR_RANDOM = 0;
-    protected static final int COLOR_WHITE = 1;
-    protected static final int COLOR_BLACK = 2;
+    protected static final String TAG = "GameConfiguration";
+
+    public static final int COLOR_RANDOM = 0;
+    public static final int COLOR_WHITE = 1;
+    public static final int COLOR_BLACK = 2;
 
     protected int type = GameActivity.CHESS_CLASSIC;
     protected int color = COLOR_RANDOM;
@@ -31,6 +33,7 @@ public abstract class GameConfigurationActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         launchGame();
+        finish();
         return super.onOptionsItemSelected(item);
     }
 
