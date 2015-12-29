@@ -42,7 +42,8 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
 
     static final int CHESS_CLASSIC = 0;
     static final int CHESS_960 = 1;
-    static final int CHESS_TEST = -1;
+    static final int CHESS_TEST = 2;
+    static final int ALREADY_EXIST = -1;
     static final String GAME = "game";
 
     static final String SEED = "seed";
@@ -62,7 +63,7 @@ public abstract class GameActivity extends AppCompatActivity implements Chess.Li
         super.onCreate(savedInstanceState);
 
         initialIntent = getIntent();
-        int gameId = initialIntent.getIntExtra(GAME, CHESS_CLASSIC);
+        int gameId = initialIntent.getIntExtra(GAME, ALREADY_EXIST);
         long seed = initialIntent.getLongExtra(SEED, 1);
         setContentView(R.layout.activity_chess_view);
 

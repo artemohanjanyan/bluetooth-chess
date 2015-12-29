@@ -39,6 +39,7 @@ public class BluetoothService extends Service {
     private ConnectedThread connectedThread;
 
     public Desk desk;
+    public boolean localPlayerColor;
 
     @Override
     public void onCreate() {
@@ -243,8 +244,9 @@ public class BluetoothService extends Service {
                 .setContentText(text)
                 .setSmallIcon(R.drawable.ic_bt_notification)
                 .setContentIntent(PendingIntent.getActivity(this, 0,
-                        new Intent(this, aClass).setFlags(
-                                Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                        new Intent(this, aClass)
+                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                .putExtra(BtGameActivity.LOCAL_PLAYER_COLOR, localPlayerColor),
                         0));
 
         startForeground(NOTIFICATION_ID, builder.build());

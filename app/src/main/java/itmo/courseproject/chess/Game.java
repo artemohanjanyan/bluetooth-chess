@@ -25,8 +25,7 @@ public abstract class Game {
         this.whitePlayer = whitePlayer;
         this.blackPlayer = blackPlayer;
 
-        this.desk = desk;
-        desk.game = this;
+        this.deskToView = desk;
 
         whitePlayer.game = this;
         whitePlayer.color = Chess.WHITE;
@@ -34,11 +33,11 @@ public abstract class Game {
         blackPlayer.game = this;
         blackPlayer.color = Chess.BLACK;
 
-        Figure[][] figuresToView = new Figure[Desk.SIZE][];
+        Figure[][] figures = new Figure[Desk.SIZE][];
         for (int i = 0; i < Desk.SIZE; i++) {
-            figuresToView[i] = Arrays.copyOf(desk.d[i], Desk.SIZE);
+            figures[i] = Arrays.copyOf(desk.d[i], Desk.SIZE);
         }
-        deskToView = new Desk(figuresToView, desk.turn, this);
+        this.desk = new Desk(figures, desk.turn, this);
 
         whitePlayer.onYourTurn();
     }
